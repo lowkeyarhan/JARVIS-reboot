@@ -1,0 +1,127 @@
+/* Main header styles */
+.main-header {
+  padding: 20px 30px;
+  border-bottom: 1px solid rgba(10, 132, 255, 0.15);
+  background: linear-gradient(
+    180deg,
+    rgba(10, 14, 23, 0.95) 0%,
+    rgba(10, 14, 23, 0.85) 100%
+  );
+  backdrop-filter: blur(5px);
+}
+
+.greeting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.greeting h1 {
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Comfortaa", sans-serif;
+}
+
+.greeting-text {
+  background: linear-gradient(90deg, var(--primary-blue), #4585ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  position: relative;
+}
+
+.greeting > p {
+  margin: 8px 0 10px;
+  font-size: 1rem;
+  color: var(--text-dim);
+  font-family: "Poppins", sans-serif;
+  animation: fadeInUp 0.8s ease-out 0.2s forwards;
+}
+
+.status-container {
+  margin: 5px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #4bb543;
+  animation: pulse 2s infinite;
+}
+
+/* API status indicators */
+.status-indicator.online {
+  background-color: #4bb543; /* Green */
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.offline {
+  background-color: #ff4d4f; /* Red */
+  animation: none;
+}
+
+.status-indicator.checking {
+  background-color: #faad14; /* Amber */
+  animation: pulse 1s infinite;
+}
+
+.status-container p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  font-family: "Roboto", sans-serif;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(75, 181, 67, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(75, 181, 67, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(75, 181, 67, 0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .main-header {
+    padding: 15px 20px;
+  }
+
+  .greeting h1 {
+    font-size: 1.5rem;
+  }
+
+  .greeting > p {
+    font-size: 0.85rem;
+    margin: 5px 0 8px;
+  }
+
+  .status-container p {
+    font-size: 0.75rem;
+  }
+}

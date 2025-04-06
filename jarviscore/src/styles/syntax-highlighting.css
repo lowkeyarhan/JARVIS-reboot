@@ -1,0 +1,309 @@
+/* VS Code-like Syntax Highlighting */
+
+/* Base colors */
+:root {
+  --syntax-keyword: #569cd6; /* blue */
+  --syntax-function: #dcdcaa; /* yellow */
+  --syntax-variable: #9cdcfe; /* light blue */
+  --syntax-string: #ce9178; /* orange-red */
+  --syntax-number: #b5cea8; /* light green */
+  --syntax-comment: #6a9955; /* green */
+  --syntax-class: #4ec9b0; /* teal */
+  --syntax-type: #4ec9b0; /* teal */
+  --syntax-operator: #d4d4d4; /* light gray */
+  --syntax-constant: #4fc1ff; /* bright blue */
+  --syntax-property: #9cdcfe; /* light blue */
+  --syntax-tag: #569cd6; /* blue */
+  --syntax-punctuation: #d4d4d4; /* light gray */
+  --syntax-regex: #d16969; /* pink */
+  --syntax-param: #9cdcfe; /* light blue */
+  --syntax-attr: #9cdcfe; /* light blue */
+  --syntax-docstring: #608b4e; /* dark green */
+  --syntax-builtin: #4ec9b0; /* teal */
+  --syntax-namespace: #4ec9b0; /* teal */
+
+  /* J.A.R.V.I.S. theme colors */
+  --jarvis-blue: #0055ff;
+  --jarvis-blue-glow: rgba(0, 85, 255, 0.15);
+  --jarvis-dark: #121212;
+  --jarvis-border: #222222;
+}
+
+/* Language specific styling */
+.hljs-keyword,
+.hljs-reserved,
+.hljs-winutils {
+  color: var(--syntax-keyword);
+  font-weight: bold;
+}
+
+.hljs-function {
+  color: var(--syntax-function);
+}
+
+.hljs-title {
+  color: var(--syntax-function);
+}
+
+.hljs-params {
+  color: var(--syntax-param);
+}
+
+.hljs-string,
+.hljs-value {
+  color: var(--syntax-string);
+}
+
+.hljs-number,
+.hljs-hexcolor {
+  color: var(--syntax-number);
+}
+
+.hljs-comment,
+.hljs-javadoc {
+  color: var(--syntax-comment);
+  font-style: italic;
+}
+
+.hljs-class .hljs-title,
+.hljs-type {
+  color: var(--syntax-class);
+}
+
+.hljs-tag .hljs-name {
+  color: var(--syntax-tag);
+}
+
+.hljs-attr {
+  color: var(--syntax-attr);
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link {
+  color: var(--syntax-constant);
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: var(--syntax-builtin);
+}
+
+.hljs-formula {
+  background-color: rgba(255, 255, 255, 0.1);
+  font-style: italic;
+}
+
+.hljs-addition {
+  background-color: rgba(40, 124, 40, 0.15);
+}
+
+.hljs-deletion {
+  background-color: rgba(179, 29, 40, 0.15);
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+/* Improved code block styling - J.A.R.V.I.S. theme */
+.code-block {
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px var(--jarvis-blue-glow);
+  border: 1px solid var(--jarvis-border);
+  margin: 1.8rem 0;
+  position: relative;
+  background-color: rgba(18, 18, 18, 0.95);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.code-block:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 20px var(--jarvis-blue-glow);
+  transform: translateY(-2px);
+}
+
+.code-block::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 36px;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.8),
+    rgba(0, 85, 255, 0.05)
+  );
+  border-bottom: 1px solid rgba(0, 85, 255, 0.3);
+  z-index: 1;
+}
+
+.code-block::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--jarvis-blue);
+  z-index: 1;
+}
+
+.code-block .language-label {
+  position: absolute;
+  top: 9px;
+  left: 14px;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  z-index: 2;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.code-block .copy-btn {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  padding: 4px 10px;
+  background-color: rgba(0, 85, 255, 0.2);
+  border: 1px solid rgba(0, 85, 255, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.8);
+  z-index: 2;
+  transition: all 0.2s ease;
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.code-block:hover .copy-btn {
+  opacity: 1;
+}
+
+.code-block .copy-btn:hover {
+  background-color: rgba(0, 85, 255, 0.3);
+  color: #fff;
+  box-shadow: 0 0 8px rgba(0, 85, 255, 0.4);
+}
+
+.code-block pre {
+  margin: 0;
+  padding: 46px 16px 16px 16px;
+  background-color: transparent;
+  overflow-x: auto;
+}
+
+.code-block pre code {
+  font-family: "Fira Code", "Roboto Mono", monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  tab-size: 2;
+}
+
+/* Line numbers */
+.code-block .line-numbers {
+  margin-top: 36px !important;
+  padding-top: 10px !important;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-right: 1px solid var(--jarvis-border);
+}
+
+.code-block.with-line-numbers pre {
+  counter-reset: line;
+  margin-left: 3rem;
+}
+
+.line-number {
+  color: rgba(133, 133, 133, 0.8) !important;
+  font-size: 0.85rem !important;
+}
+
+/* VS Code-like scrollbar */
+.code-block pre::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.code-block pre::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.code-block pre::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 85, 255, 0.3);
+  border-radius: 4px;
+}
+
+.code-block pre::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 85, 255, 0.5);
+}
+
+/* Copy feedback animation */
+@keyframes copy-feedback {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.copy-feedback {
+  background-color: rgba(0, 150, 0, 0.8) !important;
+  border: 1px solid rgba(0, 150, 0, 0.5) !important;
+  border-radius: 4px !important;
+  color: white !important;
+  padding: 4px 10px !important;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 0.75rem !important;
+  font-family: "Poppins", sans-serif !important;
+  animation: copy-feedback 1.5s forwards !important;
+  z-index: 10;
+  box-shadow: 0 0 10px rgba(0, 150, 0, 0.4) !important;
+}
+
+/* Improve selected text highlighting */
+.code-block pre code::selection,
+.code-block pre::selection {
+  background-color: rgba(0, 85, 255, 0.3);
+}
+
+/* Add subtle animation for hover interactions */
+@keyframes subtle-pulse {
+  0% {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px var(--jarvis-blue-glow);
+  }
+  50% {
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6), 0 0 20px var(--jarvis-blue-glow);
+  }
+  100% {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px var(--jarvis-blue-glow);
+  }
+}
+
+.code-block:hover {
+  animation: subtle-pulse 2s infinite;
+}

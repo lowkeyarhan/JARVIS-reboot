@@ -1,0 +1,161 @@
+/* Homepage Layout */
+.homepage {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #0a0e17;
+  position: relative;
+}
+
+/* Circuit background pattern */
+.circuit-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.15;
+  background: linear-gradient(90deg, #0a0e17 21px, transparent 1%) center,
+    linear-gradient(#0a0e17 21px, transparent 1%) center, #2263be;
+  background-size: 22px 22px;
+  animation: patternShift 120s linear infinite;
+}
+
+/* Reactor glow effect */
+.reactor-glow {
+  position: fixed;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(10, 132, 255, 0.2) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: -1;
+  bottom: -100px;
+  right: -100px;
+  animation: reactorPulse 5s infinite alternate ease-in-out;
+  filter: blur(20px);
+}
+
+/* Secondary glows */
+.secondary-glow {
+  position: fixed;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(10, 132, 255, 0.1) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: -1;
+  animation: secondaryPulse 7s infinite alternate ease-in-out;
+  filter: blur(15px);
+}
+
+/* Circuit lines and dots */
+.circuit-line {
+  position: fixed;
+  background: #2263be;
+  opacity: 0.2;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.circuit-dot {
+  position: absolute;
+  background: #2263be;
+  border-radius: 50%;
+  opacity: 0;
+  z-index: -1;
+  pointer-events: none;
+  box-shadow: 0 0 15px #2263be;
+  animation: pulse 3s infinite alternate;
+}
+
+/* Energy path animation */
+.energy-path {
+  position: fixed;
+  background: linear-gradient(90deg, transparent, #2263be, transparent);
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
+  animation: energyFlow 8s infinite ease-in-out;
+}
+
+/* Animations */
+@keyframes patternShift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 44px 44px;
+  }
+}
+
+@keyframes reactorPulse {
+  0% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes secondaryPulse {
+  0% {
+    opacity: 0.1;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0.2;
+    transform: scale(1.3);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes energyFlow {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.1);
+    transform-origin: left;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  .homepage {
+    flex-direction: column;
+  }
+}

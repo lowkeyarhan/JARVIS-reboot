@@ -1,0 +1,415 @@
+.thinking-animation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 15px;
+  width: 100%;
+  background-color: transparent;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: none;
+  min-height: 120px;
+  position: relative;
+}
+
+.arc-reactor-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px auto;
+}
+
+.arc-reactor-outer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 85, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 85, 255, 0.3),
+    inset 0 0 15px rgba(0, 85, 255, 0.2);
+  animation: reactorPulseOuter 3s infinite alternate;
+}
+
+.arc-reactor-middle {
+  position: absolute;
+  width: 75%;
+  height: 75%;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 85, 255, 0.5);
+  box-shadow: 0 0 15px rgba(0, 85, 255, 0.5),
+    inset 0 0 10px rgba(0, 85, 255, 0.3);
+  animation: reactorRotate 12s linear infinite;
+}
+
+.arc-reactor-inner {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(0, 170, 255, 0.9) 0%,
+    rgba(0, 85, 255, 0.6) 60%,
+    rgba(0, 85, 255, 0.2) 100%
+  );
+  box-shadow: 0 0 30px rgba(0, 170, 255, 0.8);
+  animation: reactorGlow 2s infinite alternate;
+}
+
+.arc-reactor-core {
+  position: absolute;
+  width: 30%;
+  height: 30%;
+  clip-path: polygon(50% 0%, 100% 86.6%, 0% 86.6%);
+  background: linear-gradient(
+    to bottom,
+    rgb(220, 240, 255) 0%,
+    rgb(0, 85, 255) 100%
+  );
+  transform: rotate(180deg) scale(0.8);
+  z-index: 2;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
+  animation: trianglePulse 1.5s infinite alternate;
+}
+
+.energy-ring {
+  position: absolute;
+  width: 85%;
+  height: 85%;
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 170, 255, 0.4);
+  animation: reactorRingRotate 12s linear infinite reverse;
+}
+
+.energy-beam {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 170, 255, 0.7),
+    transparent
+  );
+  animation: energyBeamScan 3s infinite;
+}
+
+.energy-beam.vertical {
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(
+    0deg,
+    transparent,
+    rgba(0, 170, 255, 0.7),
+    transparent
+  );
+  animation: energyBeamScanVertical 3s infinite;
+  animation-delay: 1.5s;
+}
+
+.reactor-circuits {
+  position: absolute;
+  width: 62%;
+  height: 62%;
+  border-radius: 50%;
+  overflow: visible;
+  z-index: 1;
+  animation: circuitRotate 20s linear infinite;
+}
+
+.circuit-line {
+  position: absolute;
+  background: rgba(0, 85, 255, 0.5);
+  box-shadow: 0 0 5px rgba(0, 170, 255, 0.7);
+}
+
+.circuit-line:nth-child(1) {
+  width: 100%;
+  height: 2px;
+  top: 50%;
+  left: 0;
+  transform-origin: center;
+  transform: translateY(-50%);
+}
+
+.circuit-line:nth-child(2) {
+  width: 2px;
+  height: 100%;
+  top: 0;
+  left: 50%;
+  transform-origin: center;
+  transform: translateX(-50%);
+}
+
+.circuit-line:nth-child(3) {
+  width: 100%;
+  height: 2px;
+  top: 50%;
+  left: 0;
+  transform-origin: center;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.circuit-line:nth-child(4) {
+  width: 100%;
+  height: 2px;
+  top: 50%;
+  left: 0;
+  transform-origin: center;
+  transform: translateY(-50%) rotate(-45deg);
+}
+
+.thinking-animation::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(0, 85, 255, 0.1) 0%,
+    transparent 70%
+  );
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  animation: backgroundPulse 4s infinite alternate;
+}
+
+.thinking-animation::after {
+  content: "ANALYZING";
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "Roboto Mono", monospace;
+  font-size: 0.8rem;
+  color: rgba(0, 170, 255, 0.8);
+  letter-spacing: 2px;
+  text-shadow: 0 0 5px rgba(0, 170, 255, 0.5);
+  animation: textFlicker 2s infinite;
+}
+
+/* Add rotating circles for more sophistication */
+.rotating-circles {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  opacity: 0.3;
+}
+
+.rotating-circles::before,
+.rotating-circles::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px dashed rgba(0, 170, 255, 0.6);
+  border-radius: 50%;
+}
+
+.rotating-circles::before {
+  animation: rotateCircle1 15s linear infinite;
+}
+
+.rotating-circles::after {
+  width: 80%;
+  height: 80%;
+  top: 10%;
+  left: 10%;
+  border-style: dotted;
+  animation: rotateCircle2 12s linear infinite reverse;
+}
+
+@keyframes trianglePulse {
+  0% {
+    opacity: 0.8;
+    transform: rotate(180deg) scale(0.8);
+    box-shadow: 0 0 10px rgba(0, 170, 255, 0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(180deg) scale(0.9);
+    box-shadow: 0 0 20px rgba(0, 170, 255, 1), 0 0 40px rgba(0, 85, 255, 0.5);
+  }
+}
+
+@keyframes reactorPulseOuter {
+  0% {
+    box-shadow: 0 0 20px rgba(0, 85, 255, 0.3),
+      inset 0 0 15px rgba(0, 85, 255, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 25px rgba(0, 170, 255, 0.6),
+      inset 0 0 20px rgba(0, 85, 255, 0.4);
+  }
+}
+
+@keyframes reactorRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes circuitRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes reactorGlow {
+  0% {
+    opacity: 0.7;
+    box-shadow: 0 0 20px rgba(0, 85, 255, 0.5);
+  }
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 40px rgba(0, 170, 255, 0.9);
+  }
+}
+
+@keyframes reactorRingRotate {
+  0% {
+    transform: rotate(0deg) scale(0.9);
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: rotate(360deg) scale(1.1);
+    opacity: 0.3;
+  }
+}
+
+@keyframes energyBeamScan {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.7;
+  }
+  80% {
+    opacity: 0.7;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes energyBeamScanVertical {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.7;
+  }
+  80% {
+    opacity: 0.7;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes backgroundPulse {
+  0% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+@keyframes textFlicker {
+  0%,
+  19%,
+  21%,
+  23%,
+  25%,
+  54%,
+  56%,
+  100% {
+    opacity: 0.9;
+    text-shadow: 0 0 5px rgba(0, 170, 255, 0.5);
+  }
+  20%,
+  24%,
+  55% {
+    opacity: 0.3;
+    text-shadow: none;
+  }
+}
+
+@keyframes rotateCircle1 {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotateCircle2 {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobile responsiveness for the arc reactor */
+@media (max-width: 768px) {
+  .arc-reactor-container {
+    width: 100px;
+    height: 100px;
+  }
+
+  .arc-reactor-middle {
+    width: 70%;
+    height: 70%;
+  }
+
+  .arc-reactor-inner {
+    width: 45%;
+    height: 45%;
+  }
+
+  .arc-reactor-core {
+    width: 25%;
+    height: 25%;
+  }
+
+  .reactor-circuits {
+    width: 55%;
+    height: 55%;
+  }
+
+  .thinking-animation::after {
+    font-size: 0.7rem;
+  }
+}
