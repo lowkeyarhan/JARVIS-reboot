@@ -95,12 +95,26 @@ renderer.code = function (code, language) {
       // Use our special JSON formatter
       highlightedCode = formatJsonWithHighlighting(code);
 
+      // Use properly serialized JSON for the copy button
+      const jsonForCopy = JSON.stringify(code, null, 2);
+
       return `
         <div class="code-block">
           <div class="code-block-header">
             <span>${validLanguage}</span>
+            <button class="copy-btn" data-code="${encodeURIComponent(
+              jsonForCopy
+            )}">
+              <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon">
+                <path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                <path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+              </svg>
+              <span class="copy-text">Copy</span>
+            </button>
           </div>
-          <pre><code>${highlightedCode}</code></pre>
+          <div class="code-block-body">
+            <pre><code>${highlightedCode}</code></pre>
+          </div>
         </div>
       `;
     }
@@ -114,22 +128,49 @@ renderer.code = function (code, language) {
       ignoreIllegals: true,
     }).value;
 
+    // Make sure the code is properly encoded for the data attribute
+    const encodedCode = encodeURIComponent(code);
+
     return `
       <div class="code-block">
         <div class="code-block-header">
           <span>${validLanguage}</span>
+          <button class="copy-btn" data-code="${encodedCode}">
+            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon">
+              <path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+              <path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+            </svg>
+            <span class="copy-text">Copy</span>
+          </button>
         </div>
-        <pre><code>${highlightedCode}</code></pre>
+        <div class="code-block-body">
+          <pre><code>${highlightedCode}</code></pre>
+        </div>
       </div>
     `;
   } catch (error) {
     console.error("Error highlighting code:", error);
+
+    // Ensure error case also properly encodes content
+    const encodedCode = encodeURIComponent(
+      typeof code === "string" ? code : String(code)
+    );
+
     return `
       <div class="code-block">
         <div class="code-block-header">
           <span>code</span>
+          <button class="copy-btn" data-code="${encodedCode}">
+            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon">
+              <path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+              <path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+            </svg>
+            <span class="copy-text">Copy</span>
+          </button>
         </div>
-        <pre><code>${escapeHtml(code)}</code></pre>
+        <div class="code-block-body">
+          <pre><code>${escapeHtml(code)}</code></pre>
+        </div>
       </div>
     `;
   }
@@ -311,18 +352,53 @@ function MainContainer() {
     }
   }, [activeMessages, isLoading]);
 
-  // Process and enhance images after markdown is rendered
+  // Add event listener for copy buttons after rendering
   useEffect(() => {
     try {
       enhanceImages();
 
-      // Add copy functionality for code blocks - safer implementation
-      document.querySelectorAll(".copy-btn").forEach((button) => {
-        button.removeEventListener("click", handleCopyClick);
-        button.addEventListener("click", handleCopyClick);
+      // More reliable method for attaching copy functionality
+      const attachCopyHandlers = () => {
+        document.querySelectorAll(".copy-btn").forEach((button) => {
+          // Remove any existing listeners to prevent duplicates
+          button.removeEventListener("click", handleCopyClick);
+          button.addEventListener("click", handleCopyClick);
+        });
+      };
+
+      // Initial attachment
+      attachCopyHandlers();
+
+      // Use MutationObserver to watch for new code blocks
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === "childList" && mutation.addedNodes.length) {
+            // Check if new code blocks were added
+            setTimeout(attachCopyHandlers, 100);
+          }
+        });
       });
+
+      // Start observing the chat container
+      if (chatContainerRef.current) {
+        observer.observe(chatContainerRef.current, {
+          childList: true,
+          subtree: true,
+        });
+      }
+
+      // Cleanup function
+      return () => {
+        // Disconnect the observer
+        observer.disconnect();
+
+        // Remove all event listeners
+        document.querySelectorAll(".copy-btn").forEach((button) => {
+          button.removeEventListener("click", handleCopyClick);
+        });
+      };
     } catch (error) {
-      console.error("Error in post-render processing:", error);
+      console.error("Error setting up copy functionality:", error);
     }
   }, [activeMessages]);
 
@@ -449,49 +525,131 @@ function MainContainer() {
     // TODO: Implement attachment functionality
   };
 
-  // Handler for copy button clicks
-  const handleCopyClick = function () {
+  // Handler for copy button clicks - improved implementation
+  const handleCopyClick = function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const copyButton = this;
+
     try {
-      const encodedCode = this.getAttribute("data-code");
-      if (!encodedCode) return;
+      // Get the encoded code from data attribute
+      const encodedCode = copyButton.getAttribute("data-code");
+      if (!encodedCode) {
+        console.error("No code data found to copy");
+        return;
+      }
 
-      const textToCopy = decodeURIComponent(encodedCode);
-      const copyButton = this;
-      const originalContent = this.innerHTML;
+      // Save original button content
+      const originalContent = copyButton.innerHTML;
 
+      // Decode the text (handle potential encoding errors)
+      let textToCopy;
+      try {
+        textToCopy = decodeURIComponent(encodedCode);
+      } catch (decodeError) {
+        console.error("Failed to decode content:", decodeError);
+        textToCopy = encodedCode; // Fallback to raw content
+      }
+
+      // Use writeText with proper promise handling
       navigator.clipboard
         .writeText(textToCopy)
         .then(() => {
-          // Update button text to show success feedback
+          // Success state
           copyButton.innerHTML = `
-            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon" style="fill: #3fb950;">
+            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon" style="fill: #0a84ff;">
               <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
             </svg>
             <span class="copy-text">Copied!</span>
           `;
 
+          // Add success class for animation
+          copyButton.classList.add("copy-success");
+
+          // Reset after timeout
           setTimeout(() => {
-            if (copyButton.parentNode) {
+            if (copyButton && copyButton.parentNode) {
               copyButton.innerHTML = originalContent;
+              copyButton.classList.remove("copy-success");
             }
           }, 2000);
         })
-        .catch((err) => {
-          console.error("Failed to copy:", err);
+        .catch((error) => {
+          // Error state
+          console.error("Clipboard write failed:", error);
           copyButton.innerHTML = `
             <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon" style="fill: #f85149;">
               <path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
             </svg>
             <span class="copy-text">Error!</span>
           `;
+
+          copyButton.classList.add("copy-error");
+
           setTimeout(() => {
-            if (copyButton.parentNode) {
+            if (copyButton && copyButton.parentNode) {
               copyButton.innerHTML = originalContent;
+              copyButton.classList.remove("copy-error");
             }
           }, 2000);
+
+          // Fallback copy method for browsers with restricted clipboard API
+          if (error.name === "NotAllowedError") {
+            try {
+              // Create temporary textarea
+              const textarea = document.createElement("textarea");
+              textarea.value = textToCopy;
+              textarea.style.position = "fixed";
+              textarea.style.opacity = "0";
+              document.body.appendChild(textarea);
+              textarea.select();
+
+              // Execute copy command
+              const success = document.execCommand("copy");
+              document.body.removeChild(textarea);
+
+              if (success) {
+                // Show success state
+                copyButton.innerHTML = `
+                  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon" style="fill: #0a84ff;">
+                    <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
+                  </svg>
+                  <span class="copy-text">Copied!</span>
+                `;
+                copyButton.classList.add("copy-success");
+
+                setTimeout(() => {
+                  if (copyButton && copyButton.parentNode) {
+                    copyButton.innerHTML = originalContent;
+                    copyButton.classList.remove("copy-success");
+                  }
+                }, 2000);
+              }
+            } catch (fallbackError) {
+              console.error("Fallback copy method failed:", fallbackError);
+            }
+          }
         });
     } catch (error) {
-      console.error("Error copying code:", error);
+      console.error("Error in copy button handler:", error);
+
+      // Show general error state
+      copyButton.innerHTML = `
+        <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon" style="fill: #f85149;">
+          <path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
+        </svg>
+        <span class="copy-text">Error!</span>
+      `;
+
+      copyButton.classList.add("copy-error");
+
+      setTimeout(() => {
+        if (copyButton && copyButton.parentNode) {
+          copyButton.innerHTML = originalContent || "Copy";
+          copyButton.classList.remove("copy-error");
+        }
+      }, 2000);
     }
   };
 
