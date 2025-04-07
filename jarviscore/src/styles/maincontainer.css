@@ -381,7 +381,6 @@
 .attachments {
   display: flex;
   align-items: center;
-  gap: 5px;
   margin-right: 10px;
 }
 
@@ -422,7 +421,7 @@
 }
 
 .attachments span i {
-  font-size: 16px;
+  font-size: 18px;
   color: var(--text-dim);
   transition: all 0.3s ease;
 }
@@ -865,8 +864,8 @@
   position: relative;
   background: linear-gradient(
     135deg,
-    rgba(41, 128, 255, 0.2),
-    rgba(0, 212, 255, 0.3)
+    rgba(0, 68, 255, 0.363),
+    rgba(21, 0, 255, 0.409)
   );
   border-radius: 8px;
   border: 1px solid rgba(0, 120, 255, 0.5);
@@ -874,8 +873,8 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 15px rgba(0, 85, 255, 0.25),
     inset 0 0 8px rgba(0, 170, 255, 0.2);
-  margin-left: 8px;
   overflow: hidden;
+  margin-left: 5px;
 }
 
 #live-talk-btn::before {
@@ -883,7 +882,7 @@
   position: absolute;
   top: -12px;
   right: -8px;
-  background: linear-gradient(135deg, #0062ff, #00c3ff);
+  background: linear-gradient(135deg, #0062ff, #0000ff);
   color: white;
   font-size: 8px;
   font-weight: bold;
@@ -896,7 +895,6 @@
 }
 
 #live-talk-btn i {
-  color: rgba(0, 155, 255, 0.9);
   background: linear-gradient(135deg, #0095ff, #00d9ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -912,12 +910,11 @@
 #live-talk-btn:hover {
   background: linear-gradient(
     135deg,
-    rgba(0, 149, 255, 0.3),
-    rgba(0, 212, 255, 0.4)
+    rgba(0, 34, 255, 0.3),
+    rgba(68, 0, 255, 0.4)
   );
   box-shadow: 0 5px 15px rgba(0, 85, 255, 0.5), 0 0 25px rgba(0, 200, 255, 0.3),
     inset 0 0 10px rgba(0, 170, 255, 0.3);
-  border-color: rgba(0, 170, 255, 0.7);
 }
 
 #live-talk-btn:hover::after {
@@ -931,7 +928,7 @@
     rgba(0, 200, 255, 0.4),
     rgba(0, 120, 255, 0.5)
   );
-  color: rgba(0, 220, 255, 0.9);
+  /* color: rgba(0, 220, 255, 0.9); */
   box-shadow: 0 0 20px rgba(0, 200, 255, 0.6), 0 0 30px rgba(0, 85, 255, 0.4),
     inset 0 0 15px rgba(0, 170, 255, 0.3);
   border-color: rgba(0, 200, 255, 0.8);
