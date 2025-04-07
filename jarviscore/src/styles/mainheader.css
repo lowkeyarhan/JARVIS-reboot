@@ -106,22 +106,3 @@
   }
 }
 
-/* Media query for smaller screens */
-@media (max-width: 768px) {
-  .main-header {
-    padding: 15px 20px;
-  }
-
-  .greeting h1 {
-    font-size: 1.5rem;
-  }
-
-  .greeting > p {
-    font-size: 0.85rem;
-    margin: 5px 0 8px;
-  }
-
-  .status-container p {
-    font-size: 0.75rem;
-  }
-}

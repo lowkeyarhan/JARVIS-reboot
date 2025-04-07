@@ -324,24 +324,6 @@
   color: white;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .markdown-content h1 {
-    font-size: 1.8rem;
-  }
-
-  .markdown-content h2 {
-    font-size: 1.4rem;
-  }
-
-  .markdown-content pre,
-  .markdown-content code,
-  .markdown-content table {
-    font-size: 85%;
-  }
-}
-
-/* Error boundary styling - GitHub-like */
 .error-boundary-fallback {
   display: flex;
   flex-direction: column;

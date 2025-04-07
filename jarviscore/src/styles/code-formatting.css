@@ -1,5 +1,3 @@
-/* Enhanced Code Formatting CSS - VS Code Theme */
-
 /* Code Block Container */
 .code-block {
   margin: 16px 0;
@@ -11,28 +9,6 @@
   display: block;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
-
-/* Code Block Header */
-/* .code-block-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #252526;
-  padding: 8px;
-  border-bottom: 1px solid #1e1e1e;
-  font-family: "Fira Code", monospace;
-  font-size: 12px;
-  text-transform: lowercase;
-  font-weight: 500;
-}
-
-.code-block-header span {
-  background-color: #37373d;
-  padding: 2px 8px;
-  border-radius: 4px;
-  color: rgb(80, 176, 255);
-  letter-spacing: 0.5px;
-} */
 
 /* Code Block Content */
 .code-block pre {

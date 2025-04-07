@@ -16,24 +16,17 @@ export function extractLanguage(content, defaultLanguage = "plaintext") {
   if (typeof content !== "object" || content === null) {
     return defaultLanguage;
   }
-
-  // If it has a lang property (common in code tokens), use that
   if (content.lang !== undefined) {
     return content.lang;
   }
-
-  // Check for language in different properties
   if (content.language !== undefined) {
     return content.language;
   }
-
-  // Try to detect language from common object structures
   if (typeof content === "object") {
     if (content.type === "code" && content.lang) {
       return content.lang;
     }
 
-    // Special case for Java objects
     if (
       (content.raw && content.raw.includes("java")) ||
       (content.text && content.text.includes("java"))
@@ -55,18 +48,12 @@ export function extractCodeContent(content) {
   if (typeof content !== "object" || content === null) {
     return content;
   }
-
-  // If it looks like a marked token with text property, extract the text
   if (content.text !== undefined) {
     return content.text;
   }
-
-  // If it has a raw property (typical for marked tokens), use that
   if (content.raw !== undefined) {
     return content.raw;
   }
-
-  // For other objects, stringify them
   return JSON.stringify(content, null, 2);
 }
 
@@ -80,26 +67,19 @@ export function formatCode(content) {
   if (content === null || content === undefined) {
     return "";
   }
-
-  // If it's already a string, return it
   if (typeof content === "string") {
     return content;
   }
 
-  // First try to extract actual code content if it's a code token object
   const extractedContent = extractCodeContent(content);
   if (typeof extractedContent === "string") {
     return extractedContent;
   }
-
-  // If it's an object, format it as JSON
   if (typeof content === "object") {
     try {
-      // Format with 2-space indentation for readability
       return JSON.stringify(content, null, 2);
     } catch (error) {
       console.error("Error formatting object as JSON:", error);
-      // Fallback to basic string conversion if stringify fails
       return String(content);
     }
   }

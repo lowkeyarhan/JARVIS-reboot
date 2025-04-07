@@ -490,62 +490,7 @@
   transform: translateX(1px);
 }
 
-/* Media queries for responsive design */
-@media (max-width: 768px) {
-  .message {
-    max-width: 90%;
-  }
-
-  .main-header {
-    padding: 15px 20px;
-  }
-
-  .input-container {
-    padding: 12px;
-  }
-
-  .input-container form {
-    padding: 5px 5px 5px 15px;
-  }
-
-  .message-input {
-    padding: 8px 8px 8px 0;
-    font-size: 0.9rem;
-  }
-
-  .attachments {
-    gap: 5px;
-  }
-
-  .attachments span {
-    width: 25px;
-    height: 25px;
-  }
-
-  .attachments span i {
-    font-size: 0.8rem;
-  }
-
-  .send-button {
-    width: 36px;
-    height: 36px;
-  }
-
-  .send-button i {
-    font-size: 0.8rem;
-  }
-
-  .greeting h1 {
-    font-size: 1.8rem;
-  }
-
-  .greeting p {
-    font-size: 0.9rem;
-  }
-}
-
 /* HUD overlay styles */
-
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(0, 170, 255, 0.7);

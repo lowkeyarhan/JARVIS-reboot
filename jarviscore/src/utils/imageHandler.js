@@ -25,11 +25,9 @@ export function enhanceImages() {
       // Mark as enhanced
       img.dataset.enhanced = "true";
 
-      // Wrap in container for styling
       const container = document.createElement("div");
       container.className = "image-container";
 
-      // Set container style
       container.style.position = "relative";
       container.style.margin = "1.5rem 0";
       container.style.textAlign = "center";
@@ -39,9 +37,7 @@ export function enhanceImages() {
       container.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.1)";
       container.style.transition = "all 0.3s ease";
 
-      // Replace img with container
       if (img.parentNode.classList.contains("image-container")) {
-        // Already enhanced, skip
         return;
       }
 
@@ -57,13 +53,10 @@ export function enhanceImages() {
       img.style.borderRadius = "8px";
       img.style.transition = "transform 0.3s ease";
 
-      // Add alt text as caption if available
       if (img.alt && img.alt.trim() !== "") {
         const caption = document.createElement("div");
         caption.className = "image-caption";
         caption.textContent = img.alt;
-
-        // Style the caption
         caption.style.padding = "0.8rem";
         caption.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
         caption.style.color = "rgba(255, 255, 255, 0.9)";
@@ -93,7 +86,6 @@ export function createLightbox(src, alt) {
   let lightbox = document.getElementById("image-lightbox");
 
   if (!lightbox) {
-    // Create new lightbox
     lightbox = document.createElement("div");
     lightbox.id = "image-lightbox";
 
@@ -111,7 +103,6 @@ export function createLightbox(src, alt) {
     lightbox.style.zIndex = "9999";
     lightbox.style.opacity = "0";
     lightbox.style.transition = "opacity 0.3s ease";
-
     document.body.appendChild(lightbox);
 
     // Close lightbox on background click

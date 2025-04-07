@@ -221,26 +221,3 @@
   font-family: "Comfortaa", sans-serif;
 }
 
-/* Media queries for responsive design */
-@media (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-    height: auto;
-    max-height: 300px;
-    border-right: none;
-    border-bottom: 1px solid rgba(10, 132, 255, 0.15);
-  }
-
-  .sidebar-header h1 {
-    font-size: 1.8rem;
-  }
-
-  .sidebar-header p {
-    font-size: 12px;
-  }
-
-  .new-chat-button {
-    padding: 10px;
-    font-size: 0.85rem;
-  }
-}

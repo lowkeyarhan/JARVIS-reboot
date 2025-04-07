@@ -153,9 +153,3 @@
   }
 }
 
-/* Media queries for responsive design */
-@media (max-width: 768px) {
-  .homepage {
-    flex-direction: column;
-  }
-}

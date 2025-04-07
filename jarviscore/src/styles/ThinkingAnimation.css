@@ -363,34 +363,3 @@
   }
 }
 
-/* Mobile responsiveness for the arc reactor */
-@media (max-width: 768px) {
-  .arc-reactor-container {
-    width: 100px;
-    height: 100px;
-  }
-
-  .arc-reactor-middle {
-    width: 70%;
-    height: 70%;
-  }
-
-  .arc-reactor-inner {
-    width: 45%;
-    height: 45%;
-  }
-
-  .arc-reactor-core {
-    width: 25%;
-    height: 25%;
-  }
-
-  .reactor-circuits {
-    width: 55%;
-    height: 55%;
-  }
-
-  .thinking-animation::after {
-    font-size: 0.7rem;
-  }
-}
