@@ -24,7 +24,7 @@ function Sidebar() {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <h1>J.A.R.V.I.S</h1>
+        <h1>JARVIS</h1>
         <p>Always Watching, Always Learning</p>
         <div className="new-chat">
           <button className="new-chat-button" onClick={startNewConversation}>

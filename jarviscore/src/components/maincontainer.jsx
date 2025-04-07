@@ -236,7 +236,7 @@ function MainContainer() {
             >
               <div className="message-header">
                 <span className="message-sender">
-                  {message.role === "user" ? "USER" : "J.A.R.V.I.S."}
+                  {message.role === "user" ? "USER" : "JARVIS"}
                 </span>
                 <span className="message-timestamp">
                   {formatTimestamp(message.timestamp || message.id)}
@@ -259,7 +259,7 @@ function MainContainer() {
         {isLoading && (
           <div className="message assistant-message">
             <div className="message-header">
-              <span className="message-sender">J.A.R.V.I.S.</span>
+              <span className="message-sender">JARVIS</span>
               <span className="message-timestamp">
                 {formatTimestamp(currentTime)}
               </span>
