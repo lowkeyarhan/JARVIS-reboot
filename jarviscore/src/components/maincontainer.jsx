@@ -3,6 +3,7 @@ import MainHeader from "../containers/mainheader.jsx";
 import ThinkingAnimation from "./ThinkingAnimation.jsx";
 import VoiceToText from "./VoiceToText.jsx";
 import ImageUpload from "./ImageUpload.jsx";
+import FileUpload from "./FileUpload.jsx";
 import generateGeminiResponse, {
   checkApiStatus,
 } from "../services/geminiApi.js";
@@ -115,7 +116,7 @@ renderer.code = function (code, language) {
             </button>
           </div>
           <div class="code-block-body">
-            <pre><code>${highlightedCode}</code></pre>
+          <pre><code>${highlightedCode}</code></pre>
           </div>
         </div>
       `;
@@ -146,7 +147,7 @@ renderer.code = function (code, language) {
           </button>
         </div>
         <div class="code-block-body">
-          <pre><code>${highlightedCode}</code></pre>
+        <pre><code>${highlightedCode}</code></pre>
         </div>
       </div>
     `;
@@ -171,7 +172,7 @@ renderer.code = function (code, language) {
           </button>
         </div>
         <div class="code-block-body">
-          <pre><code>${escapeHtml(code)}</code></pre>
+        <pre><code>${escapeHtml(code)}</code></pre>
         </div>
       </div>
     `;
@@ -296,12 +297,15 @@ function MainContainer() {
   const [apiAvailable, setApiAvailable] = useState(true);
   const [currentTime, setCurrentTime] = useState(Date.now());
 
-  // State for voice and image features
+  // State for voice, image, and file features
   const [isVoiceActive, setIsVoiceActive] = useState(false);
   const [isImageUploadActive, setIsImageUploadActive] = useState(false);
+  const [isFileUploadActive, setIsFileUploadActive] = useState(false);
   const [imageSelected, setImageSelected] = useState(false);
+  const [filesSelected, setFilesSelected] = useState(false);
 
   const chatContainerRef = useRef(null);
+  const fileUploadRef = useRef({});
 
   const {
     activeMessages,
@@ -367,10 +371,10 @@ function MainContainer() {
 
       // More reliable method for attaching copy functionality
       const attachCopyHandlers = () => {
-        document.querySelectorAll(".copy-btn").forEach((button) => {
+      document.querySelectorAll(".copy-btn").forEach((button) => {
           // Remove any existing listeners to prevent duplicates
-          button.removeEventListener("click", handleCopyClick);
-          button.addEventListener("click", handleCopyClick);
+        button.removeEventListener("click", handleCopyClick);
+        button.addEventListener("click", handleCopyClick);
         });
       };
 
@@ -629,10 +633,168 @@ function MainContainer() {
     }
   };
 
-  // Handle text submission
+  // Handle attachment clicks
+  const handleAttachmentClick = (type) => {
+    if (type === "microphone") {
+      setIsVoiceActive(!isVoiceActive);
+      setIsImageUploadActive(false);
+      setIsFileUploadActive(false);
+    } else if (type === "photo") {
+      if (imageSelected && handleImageUpload) {
+        // If image is selected, clicking again will clear it
+        clearSelectedImage();
+      } else {
+        // Otherwise trigger file input to select an image
+        const fileInput = document.querySelector(".file-input");
+        if (fileInput) {
+          fileInput.click();
+        }
+      }
+    } else if (type === "files") {
+      if (filesSelected) {
+        clearSelectedFiles();
+      } else {
+        const fileInput = document.querySelector(".file-input-multi");
+        if (fileInput) {
+          fileInput.click();
+        }
+      }
+    }
+  };
+
+  // Function to clear selected files
+  const clearSelectedFiles = () => {
+    if (fileUploadRef.current) {
+      if (fileUploadRef.current.getCurrentFiles) {
+        fileUploadRef.current.getCurrentFiles = () => [];
+      }
+      fileUploadRef.current.filesSelected = false;
+      setFilesSelected(false);
+
+      // Reset file input if it exists
+      const fileInput = document.querySelector(".file-input-multi");
+      if (fileInput) {
+        fileInput.value = null;
+      }
+    }
+  };
+
+  // Function to clear a selected image
+  const clearSelectedImage = () => {
+    if (handleImageUpload) {
+      // Reset image state in parent component
+      if (handleImageUpload.getCurrentImage) {
+        handleImageUpload.getCurrentImage = () => null;
+      }
+      handleImageUpload.imageSelected = false;
+      setImageSelected(false);
+
+      // Reset file input if it exists
+      const fileInput = document.querySelector(".file-input");
+      if (fileInput) {
+        fileInput.value = null;
+      }
+    }
+  };
+
+  // Open image in fullscreen
+  const openImageFullscreen = (imageUrl, imageName) => {
+    if (createLightbox && imageUrl) {
+      createLightbox(imageUrl, imageName);
+    }
+  };
+
+  // Check for image and file selection status
+  useEffect(() => {
+    const checkSelectionStatus = () => {
+      if (handleImageUpload && handleImageUpload.imageSelected) {
+        setImageSelected(true);
+      } else {
+        setImageSelected(false);
+      }
+
+      if (fileUploadRef.current && fileUploadRef.current.filesSelected) {
+        setFilesSelected(true);
+      } else {
+        setFilesSelected(false);
+      }
+    };
+
+    // Set up an interval to check selection status
+    checkSelectionStatus(); // Check immediately
+    const interval = setInterval(checkSelectionStatus, 300);
+
+    // Clean up interval
+    return () => clearInterval(interval);
+  }, [handleImageUpload, fileUploadRef.current]);
+
+  // Render custom message content based on type
+  const renderMessageContent = (message) => {
+    if (message.role === "user") {
+      return (
+        <div>
+          <p>{message.content}</p>
+          {message.image && (
+            <div className="user-image-container">
+              <img
+                src={message.image.dataUrl}
+                alt={message.image.name || "Uploaded image"}
+                className="user-image"
+                onClick={() =>
+                  openImageFullscreen(message.image.dataUrl, message.image.name)
+                }
+              />
+              <div className="image-info">
+                <span className="image-name">{message.image.name}</span>
+                <span className="image-size">
+                  {(message.image.size / 1024).toFixed(1)} KB
+                </span>
+              </div>
+            </div>
+          )}
+          {message.files && message.files.length > 0 && (
+            <div className="user-files-container">
+              {message.files.map((file) => (
+                <div className="user-file" key={file.id}>
+                  <div className="file-icon">
+                    <i className={`fa-solid ${getFileIcon(file.type)}`}></i>
+                  </div>
+                  <div className="file-info">
+                    <span className="file-name">{file.name}</span>
+                    <span className="file-size">
+                      {(file.size / 1024).toFixed(1)} KB
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    } else {
+      return (
+        <ErrorBoundary
+          resetError={() => {
+            console.log("Attempting to reset error");
+          }}
+        >
+          <div
+            className="markdown-content"
+            dangerouslySetInnerHTML={renderMarkdown(message.content)}
+          />
+        </ErrorBoundary>
+      );
+    }
+  };
+
+  // Handle text submission with image and files
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if ((inputMessage.trim() === "" && !imageSelected) || isLoading) return;
+    if (
+      (inputMessage.trim() === "" && !imageSelected && !filesSelected) ||
+      isLoading
+    )
+      return;
 
     // Check if API is available
     if (!apiAvailable) {
@@ -669,17 +831,35 @@ function MainContainer() {
       clearSelectedImage();
     }
 
-    // Add user message with optional image
+    // Check if we have files to upload
+    let fileData = [];
+    if (
+      filesSelected &&
+      fileUploadRef.current &&
+      fileUploadRef.current.getCurrentFiles
+    ) {
+      fileData = fileUploadRef.current.getCurrentFiles();
+      // Clear the selected files after getting the data
+      clearSelectedFiles();
+    }
+
+    // Add user message with optional image and files
     const userMessage = {
       id: Date.now(),
       role: "user",
-      content: inputMessage || (imageData ? "" : ""),
+      content: inputMessage || (imageData || fileData.length > 0 ? "" : ""),
       timestamp: Date.now(),
       image: imageData,
+      files: fileData.length > 0 ? fileData : null,
     };
 
-    // Don't proceed if no content and no image
-    if (userMessage.content.trim() === "" && !imageData) return;
+    // Don't proceed if no content, no image, and no files
+    if (
+      userMessage.content.trim() === "" &&
+      !imageData &&
+      (!fileData || fileData.length === 0)
+    )
+      return;
 
     const updatedMessages = [...activeMessages, userMessage];
     updateActiveMessages(updatedMessages);
@@ -688,7 +868,7 @@ function MainContainer() {
     if (activeMessages.length === 1) {
       updateConversationTitle(
         activeConversationId,
-        inputMessage || "Image upload"
+        inputMessage || "File/Image upload"
       );
     }
 
@@ -698,111 +878,54 @@ function MainContainer() {
     handleAIResponse(updatedMessages);
   };
 
-  // Handle attachment clicks
-  const handleAttachmentClick = (type) => {
-    // Only handle voice activation - image handling is different now
-    if (type === "microphone") {
-      setIsVoiceActive(!isVoiceActive);
-      setIsImageUploadActive(false);
-    } else if (type === "photo") {
-      if (imageSelected && handleImageUpload) {
-        // If image is selected, clicking again will clear it
-        clearSelectedImage();
-      } else {
-        // Otherwise trigger file input to select an image
-        const fileInput = document.querySelector(".file-input");
-        if (fileInput) {
-          fileInput.click();
-        }
-      }
-    } else if (type === "files") {
-      console.log("Files attachment clicked - Not implemented yet");
+  // Get file icon based on file type
+  const getFileIcon = (fileType) => {
+    if (fileType.startsWith("image/")) {
+      return "fa-file-image";
+    } else if (fileType.includes("pdf")) {
+      return "fa-file-pdf";
+    } else if (
+      fileType.includes("document") ||
+      fileType.includes("msword") ||
+      fileType.includes("officedocument.wordprocessing")
+    ) {
+      return "fa-file-word";
+    } else if (
+      fileType.includes("spreadsheet") ||
+      fileType.includes("excel") ||
+      fileType.includes("officedocument.spreadsheet")
+    ) {
+      return "fa-file-excel";
+    } else if (
+      fileType.includes("presentation") ||
+      fileType.includes("powerpoint") ||
+      fileType.includes("officedocument.presentation")
+    ) {
+      return "fa-file-powerpoint";
+    } else if (fileType.includes("text/")) {
+      return "fa-file-alt";
+    } else if (fileType.includes("audio/")) {
+      return "fa-file-audio";
+    } else if (fileType.includes("video/")) {
+      return "fa-file-video";
+    } else if (
+      fileType.includes("zip") ||
+      fileType.includes("rar") ||
+      fileType.includes("tar") ||
+      fileType.includes("7z")
+    ) {
+      return "fa-file-archive";
+    } else if (fileType.includes("csv")) {
+      return "fa-file-csv";
+    } else if (
+      fileType.includes("code") ||
+      fileType.includes("javascript") ||
+      fileType.includes("html") ||
+      fileType.includes("css")
+    ) {
+      return "fa-file-code";
     }
-  };
-
-  // Function to clear a selected image
-  const clearSelectedImage = () => {
-    if (handleImageUpload) {
-      // Reset image state in parent component
-      if (handleImageUpload.getCurrentImage) {
-        handleImageUpload.getCurrentImage = () => null;
-      }
-      handleImageUpload.imageSelected = false;
-      setImageSelected(false);
-
-      // Reset file input if it exists
-      const fileInput = document.querySelector(".file-input");
-      if (fileInput) {
-        fileInput.value = null;
-      }
-    }
-  };
-
-  // Open image in fullscreen
-  const openImageFullscreen = (imageUrl, imageName) => {
-    if (createLightbox && imageUrl) {
-      createLightbox(imageUrl, imageName);
-    }
-  };
-
-  // Check for image selection status
-  useEffect(() => {
-    const checkImageSelection = () => {
-      if (handleImageUpload && handleImageUpload.imageSelected) {
-        setImageSelected(true);
-      } else {
-        setImageSelected(false);
-      }
-    };
-
-    // Set up an interval to check image selection status
-    checkImageSelection(); // Check immediately
-    const interval = setInterval(checkImageSelection, 300);
-
-    // Clean up interval
-    return () => clearInterval(interval);
-  }, [handleImageUpload]);
-
-  // Render custom message content based on type
-  const renderMessageContent = (message) => {
-    if (message.role === "user") {
-      return (
-        <div>
-          <p>{message.content}</p>
-          {message.image && (
-            <div className="user-image-container">
-              <img
-                src={message.image.dataUrl}
-                alt={message.image.name || "Uploaded image"}
-                className="user-image"
-                onClick={() =>
-                  openImageFullscreen(message.image.dataUrl, message.image.name)
-                }
-              />
-              <div className="image-info">
-                <span className="image-name">{message.image.name}</span>
-                <span className="image-size">
-                  {(message.image.size / 1024).toFixed(1)} KB
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    } else {
-      return (
-        <ErrorBoundary
-          resetError={() => {
-            console.log("Attempting to reset error");
-          }}
-        >
-          <div
-            className="markdown-content"
-            dangerouslySetInnerHTML={renderMarkdown(message.content)}
-          />
-        </ErrorBoundary>
-      );
-    }
+    return "fa-file";
   };
 
   // Render the component
@@ -871,7 +994,20 @@ function MainContainer() {
         setIsActive={setIsImageUploadActive}
       />
 
+      {/* File Upload Component */}
+      <FileUpload
+        onFileUpload={fileUploadRef.current}
+        isActive={isFileUploadActive}
+        setIsActive={setIsFileUploadActive}
+      />
+
       <div className="input-container">
+        {filesSelected && (
+          <div className="selected-files-preview">
+            {/* Files will be rendered by the FileUpload component */}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <textarea
             ref={textareaRef}
@@ -897,7 +1033,11 @@ function MainContainer() {
             >
               <i className="fa-regular fa-image"></i>
             </span>
-            <span id="files" onClick={() => handleAttachmentClick("files")}>
+            <span
+              id="files"
+              className={filesSelected ? "files-selected" : ""}
+              onClick={() => handleAttachmentClick("files")}
+            >
               <i className="fa-solid fa-paperclip"></i>
             </span>
             <span
@@ -916,7 +1056,7 @@ function MainContainer() {
             disabled={
               isLoading ||
               !apiAvailable ||
-              (inputMessage.trim() === "" && !imageSelected)
+              (inputMessage.trim() === "" && !imageSelected && !filesSelected)
             }
           >
             <i className="fa-regular fa-paper-plane"></i>

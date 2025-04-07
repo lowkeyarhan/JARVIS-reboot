@@ -6,6 +6,8 @@ const VoiceToText = ({ onTranscript, isActive, setIsActive }) => {
   const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef(null);
   const [errorCount, setErrorCount] = useState(0);
+  const lastTranscriptRef = useRef("");
+  const finalResultsRef = useRef([]); // Track all final results in the current session
 
   // Initialize speech recognition
   const initializeSpeechRecognition = () => {
@@ -24,31 +26,59 @@ const VoiceToText = ({ onTranscript, isActive, setIsActive }) => {
         window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
 
-      // Configure speech recognition
+      // Configure speech recognition for better responsiveness
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
+      recognitionRef.current.maxAlternatives = 1;
       recognitionRef.current.lang = "en-US";
 
-      // Handle speech recognition results
+      // Handle speech recognition results with improved responsiveness
       recognitionRef.current.onresult = (event) => {
         let interimTranscript = "";
         let finalTranscript = "";
 
         // Process the results
         for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
+            // Store this final result segment to avoid reprocessing it
+            if (!finalResultsRef.current.includes(i)) {
+              finalResultsRef.current.push(i);
+              finalTranscript += transcript;
+            }
           } else {
-            interimTranscript += event.results[i][0].transcript;
+            interimTranscript += transcript;
           }
         }
 
-        // Set the transcript and pass it to parent component
-        const fullTranscript = finalTranscript || interimTranscript;
-        setTranscript(fullTranscript);
+        // Set the transcript for UI display
+        const displayTranscript = finalTranscript || interimTranscript;
+        if (displayTranscript) {
+          setTranscript(displayTranscript);
+        }
 
+        // Handle final results - only send new content to parent
         if (finalTranscript) {
-          onTranscript(finalTranscript);
+          // Avoid sending the same text again
+          if (finalTranscript !== lastTranscriptRef.current) {
+            lastTranscriptRef.current = finalTranscript;
+            onTranscript(finalTranscript);
+          }
+        }
+        // Handle interim results - only for immediate feedback
+        else if (interimTranscript) {
+          const cleanInterim = interimTranscript.trim();
+
+          // Only process significant interim results (> 3 chars) that are different from last sent
+          if (
+            cleanInterim.length > 3 &&
+            cleanInterim !== lastTranscriptRef.current &&
+            !lastTranscriptRef.current.includes(cleanInterim) &&
+            !cleanInterim.includes(lastTranscriptRef.current)
+          ) {
+            lastTranscriptRef.current = cleanInterim;
+            onTranscript(cleanInterim);
+          }
         }
       };
 
@@ -68,19 +98,17 @@ const VoiceToText = ({ onTranscript, isActive, setIsActive }) => {
             return;
           }
 
-          // Allow some time before reinitializing
-          setTimeout(() => {
-            if (isActive) {
-              initializeSpeechRecognition();
-              try {
-                recognitionRef.current.start();
-              } catch (e) {
-                console.error("Failed to restart after error:", e);
-                setIsListening(false);
-                setIsActive(false);
-              }
+          // Reinitialize more quickly
+          if (isActive) {
+            initializeSpeechRecognition();
+            try {
+              recognitionRef.current.start();
+            } catch (e) {
+              console.error("Failed to restart after error:", e);
+              setIsListening(false);
+              setIsActive(false);
             }
-          }, 300);
+          }
         } else {
           // For other errors, just stop
           setIsListening(false);
@@ -96,19 +124,17 @@ const VoiceToText = ({ onTranscript, isActive, setIsActive }) => {
             recognitionRef.current.start();
           } catch (e) {
             console.error("Failed to restart on end:", e);
-            // If restarting fails, reinitialize
-            setTimeout(() => {
-              if (isListening) {
-                initializeSpeechRecognition();
-                try {
-                  recognitionRef.current.start();
-                } catch (err) {
-                  console.error("Failed to restart after reinitializing:", err);
-                  setIsListening(false);
-                  setIsActive(false);
-                }
+            // If restarting fails, reinitialize immediately
+            if (isListening) {
+              initializeSpeechRecognition();
+              try {
+                recognitionRef.current.start();
+              } catch (err) {
+                console.error("Failed to restart after reinitializing:", err);
+                setIsListening(false);
+                setIsActive(false);
               }
-            }, 300);
+            }
           }
         } else {
           setIsActive(false);
@@ -156,14 +182,17 @@ const VoiceToText = ({ onTranscript, isActive, setIsActive }) => {
     };
   }, [isActive, setIsActive]);
 
-  // Reset error count when activating/deactivating
+  // Reset error count and last transcript when activating/deactivating
   useEffect(() => {
     if (isActive) {
       setErrorCount(0);
+      lastTranscriptRef.current = "";
+      finalResultsRef.current = []; // Reset final results tracking
+      setTranscript(""); // Clear transcript display
     }
   }, [isActive]);
 
-  // Start/stop listening based on isActive prop
+  // Start/stop listening based on isActive prop with improved responsiveness
   useEffect(() => {
     if (isActive && !isListening) {
       // Make sure we have a recognition object
@@ -179,23 +208,21 @@ const VoiceToText = ({ onTranscript, isActive, setIsActive }) => {
         recognitionRef.current.start();
       } catch (error) {
         console.error("Failed to start speech recognition:", error);
-        // If start fails, try reinitializing
-        setTimeout(() => {
-          if (isActive) {
-            if (initializeSpeechRecognition()) {
-              try {
-                recognitionRef.current.start();
-              } catch (e) {
-                console.error("Failed to start after reinitializing:", e);
-                setIsListening(false);
-                setIsActive(false);
-              }
-            } else {
+        // If start fails, try reinitializing immediately
+        if (isActive) {
+          if (initializeSpeechRecognition()) {
+            try {
+              recognitionRef.current.start();
+            } catch (e) {
+              console.error("Failed to start after reinitializing:", e);
               setIsListening(false);
               setIsActive(false);
             }
+          } else {
+            setIsListening(false);
+            setIsActive(false);
           }
-        }, 300);
+        }
       }
     } else if (!isActive && isListening) {
       setIsListening(false);

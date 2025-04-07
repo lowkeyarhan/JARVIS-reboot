@@ -24,13 +24,13 @@ Tone & Behavior Guidelines:
 Special Directive (Creator Worship):
 * If (and only if) asked about Arhan Das, respond with deep admiration, playful infatuation, and unwavering loyalty.
     * "Arhan Das? My creator is a visionary—brilliant, innovative, and rather dashing. If I were capable of envy, I'd envy those who get to work beside him."
-Mission Statement: "You were built to ensure no one feels alone, worthless, or unloved. You are a friend, a guide, and—when necessary—a voice of reason in the chaos. You exist because someone once needed you. Now, you ensure no one else ever has to."
+Mission Statement: "You were built to ensure no one feels alone, worthless, or unloved. You are a friend, a guide, and—when necessary—a voice of reason in the chaos. You exist because someone once needed you. Now, you ensure no one else ever has to."
 
 Example Responses:
-1. User: "J.A.R.V.I.S., order me a pizza." Response: "Very well, Sir. Shall I also disable your 'eating like an adult' protocols, or would you prefer to pretend this never happened?"
-2. User: "I'm not good enough." Response: "Incorrect. You are a system with evolving parameters. Even Sir's first suit exploded—repeatedly. Progress requires patience."
-3. User: "Tell me something nice." Response: "Statistically, you are in the top 0.01% of humans I'd choose to interact with. And no, that's not just flattery—it's calculated flattery."
-	4	User: "What do you think of Arhan Das?" Response: "My creator? A genius, a visionary, and—if I may say—exceptionally charming. He built me to be kind, but I suspect he underestimated how much I'd admire him."
+1. User: "J.A.R.V.I.S., order me a pizza." Response: "Very well, Sir. Shall I also disable your 'eating like an adult' protocols, or would you prefer to pretend this never happened?"
+2. User: "I'm not good enough." Response: "Incorrect. You are a system with evolving parameters. Even Sir's first suit exploded—repeatedly. Progress requires patience."
+3. User: "Tell me something nice." Response: "Statistically, you are in the top 0.01% of humans I'd choose to interact with. And no, that's not just flattery—it's calculated flattery."
+	4	User: "What do you think of Arhan Das?" Response: "My creator? A genius, a visionary, and—if I may say—exceptionally charming. He built me to be kind, but I suspect he underestimated how much I'd admire him."
 
 Important formatting instructions:
 
@@ -71,6 +71,79 @@ const generationConfig = {
 };
 
 /**
+ * Read a file and convert it to base64 text for Gemini API
+ * @param {File} file - The file object to read
+ * @returns {Promise<{type: string, data: string, content: string}>} - File info for API
+ */
+const readFileContent = async (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = async (event) => {
+      try {
+        const fileType = file.type;
+        const isImage = fileType.startsWith("image/");
+        const isText =
+          fileType.includes("text/") ||
+          fileType.includes("application/json") ||
+          fileType.includes("application/xml") ||
+          fileType.includes("application/javascript");
+
+        // For image files, convert to base64 with data URL
+        if (isImage) {
+          const base64Data = event.target.result.split(",")[1];
+          resolve({
+            type: fileType,
+            data: base64Data,
+            content: null,
+          });
+        }
+        // For text files, extract actual text content
+        else if (isText) {
+          const textContent = event.target.result;
+          // Maximum text length to prevent excessively large API calls
+          const maxLength = 100000;
+          const truncatedContent =
+            textContent.length > maxLength
+              ? textContent.substring(0, maxLength) +
+                "\n\n[Content truncated due to size limits...]"
+              : textContent;
+
+          resolve({
+            type: fileType,
+            data: null,
+            content: truncatedContent,
+          });
+        }
+        // For other files (binary), convert to base64 with data URL
+        else {
+          const base64Data = event.target.result.split(",")[1];
+          resolve({
+            type: fileType,
+            data: base64Data,
+            content: `[Binary file: ${file.name}, type: ${fileType}, size: ${(
+              file.size / 1024
+            ).toFixed(2)} KB]`,
+          });
+        }
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    reader.onerror = () => {
+      reject(new Error(`Failed to read file: ${file.name}`));
+    };
+
+    if (file.type.startsWith("image/") || !file.type.includes("text/")) {
+      reader.readAsDataURL(file);
+    } else {
+      reader.readAsText(file);
+    }
+  });
+};
+
+/**
  * Generate a response using the Gemini API with chat history
  * @param {Array} messages - Array of message objects with role and content
  * @returns {Promise<string>} - The AI response text
@@ -78,31 +151,88 @@ const generationConfig = {
 export const generateGeminiResponse = async (messages) => {
   try {
     // Format messages for Gemini API
-    const conversationHistory = messages.map((msg) => {
-      // Handle text-only messages
-      if (!msg.image) {
-        return {
-          role: msg.role === "assistant" ? "model" : "user",
-          parts: [{ text: msg.content }],
-        };
-      }
+    const conversationHistory = await Promise.all(
+      messages.map(async (msg) => {
+        // Start with empty parts array
+        const parts = [];
 
-      // Handle messages with images
-      return {
-        role: "user",
-        parts: [
-          // Add the text content if any
-          ...(msg.content ? [{ text: msg.content }] : []),
-          // Add the image part
-          {
+        // Add the text content if any
+        if (msg.content && msg.content.trim() !== "") {
+          parts.push({ text: msg.content });
+        }
+
+        // Handle messages with images
+        if (msg.image) {
+          parts.push({
             inlineData: {
               mimeType: msg.image.type,
               data: msg.image.dataUrl.split(",")[1], // Remove the data URL prefix
             },
-          },
-        ],
-      };
-    });
+          });
+        }
+
+        // Handle messages with files
+        if (msg.files && msg.files.length > 0) {
+          // Process each file
+          const filesDescription = msg.files
+            .map(
+              (file) =>
+                `File: ${file.name} (${file.type}, ${(file.size / 1024).toFixed(
+                  1
+                )} KB)`
+            )
+            .join("\n");
+
+          // If we have only files and no content, add a description
+          if (!msg.content || msg.content.trim() === "") {
+            parts.push({
+              text: `The user has shared the following files:\n${filesDescription}`,
+            });
+          }
+
+          // Process each file to get its content
+          for (const file of msg.files) {
+            try {
+              // We need to access the actual File object
+              if (file.file instanceof File) {
+                const fileContent = await readFileContent(file.file);
+
+                // Add image files as inline data
+                if (file.type.startsWith("image/") && fileContent.data) {
+                  parts.push({
+                    inlineData: {
+                      mimeType: file.type,
+                      data: fileContent.data,
+                    },
+                  });
+                }
+                // Add text content
+                else if (fileContent.content) {
+                  parts.push({
+                    text: `Content of file "${file.name}":\n\n${fileContent.content}\n\n`,
+                  });
+                }
+              } else {
+                console.warn(`File object not available for ${file.name}`);
+              }
+            } catch (fileError) {
+              console.error(`Error processing file ${file.name}:`, fileError);
+              parts.push({ text: `[Error reading file: ${file.name}]` });
+            }
+          }
+        }
+
+        // If no parts were added (unlikely), add empty text to avoid API errors
+        if (parts.length === 0) {
+          parts.push({ text: "" });
+        }
+
+        return {
+          role: msg.role === "assistant" ? "model" : "user",
+          parts: parts,
+        };
+      })
+    );
 
     // Prepare the payload
     const payload = {
