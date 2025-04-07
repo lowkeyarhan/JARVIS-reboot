@@ -1,6 +1,6 @@
 # JARVIS Core - React Application
 
-JARVIS Core is a modern React application built with Vite, providing a robust foundation for building intelligent and interactive user interfaces.
+JARVIS is a modern React application built with Vite, providing a robust foundation for building intelligent and interactive user interfaces.
 
 ## Features
 

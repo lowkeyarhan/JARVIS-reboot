@@ -4,6 +4,7 @@ import ThinkingAnimation from "./ThinkingAnimation.jsx";
 import VoiceToText from "./VoiceToText.jsx";
 import ImageUpload from "./ImageUpload.jsx";
 import FileUpload from "./FileUpload.jsx";
+import LiveTalk from "./LiveTalk.jsx";
 import generateGeminiResponse, {
   checkApiStatus,
 } from "../services/geminiApi.js";
@@ -301,6 +302,7 @@ function MainContainer() {
   const [isVoiceActive, setIsVoiceActive] = useState(false);
   const [isImageUploadActive, setIsImageUploadActive] = useState(false);
   const [isFileUploadActive, setIsFileUploadActive] = useState(false);
+  const [isLiveTalkActive, setIsLiveTalkActive] = useState(false);
   const [imageSelected, setImageSelected] = useState(false);
   const [filesSelected, setFilesSelected] = useState(false);
 
@@ -587,78 +589,81 @@ function MainContainer() {
   // Handle AI response
   const handleAIResponse = async (messages) => {
     setIsLoading(true);
-
     try {
-      // Get AI response from Gemini
-      const aiResponseText = await generateGeminiResponse(messages);
+      // Get AI response
+      const assistantMessage = await getAIResponse(messages);
 
-      // Add AI response to messages
-      const aiResponse = {
-        id: Date.now() + 1,
-        role: "assistant",
-        content: aiResponseText,
-        timestamp: Date.now(),
-      };
-
-      updateActiveMessages([...messages, aiResponse]);
+      // Add AI message to conversation
+      updateActiveMessages([...messages, assistantMessage]);
     } catch (error) {
-      console.error("Error getting AI response:", error);
+      console.error("Error processing with AI:", error);
 
-      // Simple error message
+      // Handle error with user-friendly message
       const errorMessage = {
-        id: Date.now() + 1,
+        id: Date.now(),
         role: "assistant",
-        content: `I'm sorry, sir. I encountered an error processing your request. My systems may need attention. Error: ${
-          error.message || "Unknown error"
-        }`,
+        content:
+          "I apologize, but I encountered an error processing your request. Please try again.",
         timestamp: Date.now(),
       };
 
       updateActiveMessages([...messages, errorMessage]);
-
-      // Update API availability
-      setApiAvailable(false);
-
-      // Try to restore API availability after 10 seconds
-      setTimeout(async () => {
-        try {
-          const status = await checkApiStatus();
-          setApiAvailable(status);
-        } catch (error) {
-          console.error("Failed to restore API connection:", error);
-        }
-      }, 10000);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Get AI response (abstracted to be used by both handleAIResponse and handleLiveTalkMessage)
+  const getAIResponse = async (messages) => {
+    try {
+      // Extract messages for API call (simple format without UI-specific properties)
+      const apiMessages = messages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+        // Include image if present
+        ...(msg.image && { image: msg.image }),
+      }));
+
+      // Call API to get response
+      const response = await generateGeminiResponse(apiMessages);
+
+      // Create assistant message
+      return {
+        id: Date.now(),
+        role: "assistant",
+        content: response,
+        timestamp: Date.now(),
+      };
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+      throw error;
+    }
+  };
+
   // Handle attachment clicks
   const handleAttachmentClick = (type) => {
-    if (type === "microphone") {
-      setIsVoiceActive(!isVoiceActive);
-      setIsImageUploadActive(false);
-      setIsFileUploadActive(false);
-    } else if (type === "photo") {
-      if (imageSelected && handleImageUpload) {
-        // If image is selected, clicking again will clear it
-        clearSelectedImage();
-      } else {
-        // Otherwise trigger file input to select an image
-        const fileInput = document.querySelector(".file-input");
-        if (fileInput) {
-          fileInput.click();
-        }
-      }
-    } else if (type === "files") {
-      if (filesSelected) {
-        clearSelectedFiles();
-      } else {
-        const fileInput = document.querySelector(".file-input-multi");
-        if (fileInput) {
-          fileInput.click();
-        }
-      }
+    // Reset all attachment states first
+    setIsVoiceActive(false);
+    setIsImageUploadActive(false);
+    setIsFileUploadActive(false);
+    setIsLiveTalkActive(false);
+
+    // Then set the active state based on the clicked button
+    switch (type) {
+      case "microphone":
+        setIsVoiceActive(true);
+        break;
+      case "photo":
+        setIsImageUploadActive(true);
+        break;
+      case "files":
+        setIsFileUploadActive(true);
+        break;
+      case "live-talk":
+        setIsLiveTalkActive(true);
+        break;
+      default:
+        break;
     }
   };
 
@@ -928,6 +933,79 @@ function MainContainer() {
     return "fa-file";
   };
 
+  // Handle live talk message send
+  const handleLiveTalkMessage = async (message) => {
+    if (!message.trim() || !apiAvailable) return null;
+
+    // Create a user message
+    const userMessage = {
+      id: Date.now(),
+      role: "user",
+      content: message,
+      timestamp: Date.now(),
+    };
+
+    // Create a temporary array with the new message for API processing
+    const messagesForApi = [...activeMessages, userMessage];
+
+    // Add user message to the chat
+    updateActiveMessages(messagesForApi);
+
+    // Start loading state
+    setIsLoading(true);
+
+    try {
+      // Extract messages for API call (simple format without UI-specific properties)
+      const apiMessages = messagesForApi.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+        // Include image if present
+        ...(msg.image && { image: msg.image }),
+      }));
+
+      // Call API to get response directly
+      const response = await generateGeminiResponse(apiMessages);
+
+      // Create assistant message
+      const assistantMessage = {
+        id: Date.now(),
+        role: "assistant",
+        content: response,
+        timestamp: Date.now(),
+      };
+
+      // Add the response to the chat container
+      updateActiveMessages([...messagesForApi, assistantMessage]);
+
+      // Return the response for the LiveTalk component to handle
+      return assistantMessage;
+    } catch (error) {
+      console.error("Error in live talk processing:", error);
+
+      // Create error message
+      const errorMessage = {
+        id: Date.now(),
+        role: "assistant",
+        content:
+          "I'm sorry, but I encountered an error processing your request. Please check the API connection or try again later.",
+        timestamp: Date.now(),
+      };
+
+      // Add error message to chat
+      updateActiveMessages([...messagesForApi, errorMessage]);
+
+      return errorMessage;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to handle receiving a live talk response
+  const handleLiveTalkResponse = (response) => {
+    // Ensure the conversation is correctly updated in the UI
+    console.log("Live talk exchange complete", response);
+  };
+
   // Render the component
   return (
     <div className="main-container">
@@ -976,6 +1054,18 @@ function MainContainer() {
             <div className="message-decorations">
               <div className="message-corner"></div>
             </div>
+          </div>
+        )}
+
+        {/* LiveTalk Component positioned as a direct child of chat-container */}
+        {isLiveTalkActive && (
+          <div className="live-talk-container">
+            <LiveTalk
+              isActive={isLiveTalkActive}
+              setIsActive={setIsLiveTalkActive}
+              onSendMessage={handleLiveTalkMessage}
+              onReceiveResponse={handleLiveTalkResponse}
+            />
           </div>
         )}
       </div>
@@ -1046,6 +1136,14 @@ function MainContainer() {
               onClick={() => handleAttachmentClick("microphone")}
             >
               <i className="fa-solid fa-microphone-lines"></i>
+            </span>
+            <span
+              id="live-talk-btn"
+              className={isLiveTalkActive ? "active" : ""}
+              onClick={() => handleAttachmentClick("live-talk")}
+              title="Live Talk"
+            >
+              <i className="fa-solid fa-headset"></i>
             </span>
           </div>
           <button
