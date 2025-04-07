@@ -4,7 +4,7 @@
 .code-block {
   margin: 16px 0;
   border-radius: 6px;
-  background-color: #0d0b1d; /* VS Code dark theme background */
+  background-color: #0d0b1d;
   overflow: hidden;
   position: relative;
   max-width: 100%;
@@ -17,7 +17,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #252526; /* VS Code darker header color */
+  background-color: #252526;
   padding: 8px;
   border-bottom: 1px solid #1e1e1e;
   font-family: "Fira Code", monospace;
@@ -37,7 +37,7 @@
 /* Code Block Content */
 .code-block pre {
   margin: 0;
-  padding: 16px;
+  padding: 10px;
   overflow-x: auto;
   background-color: transparent;
   max-width: 100%;
@@ -46,15 +46,15 @@
 
 .code-block code {
   font-family: "Fira Code", monospace;
-  font-size: 85%;
-  color: #d4d4d4; /* VS Code text color */
-  background-color: transparent;
+  font-size: 13px !important;
+  color: #d4d4d4; /* VS Code text color */ 
   padding: 0;
   white-space: pre;
   word-break: normal;
   overflow-wrap: normal;
   line-height: 1.5;
   tab-size: 2;
+  background: transparent !important;
 }
 
 /* Inline Code */
