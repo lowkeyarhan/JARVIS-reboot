@@ -11,7 +11,6 @@ function MainHeader() {
   const { activeMessages } = useChat();
   const showGreeting = activeMessages.length <= 1;
 
-  // Get current time to customize greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
@@ -52,7 +51,6 @@ function MainHeader() {
     setGreeting(getGreeting());
     updateTimeString();
 
-    // Update time every minute
     const intervalId = setInterval(() => {
       updateTimeString();
       setGreeting(getGreeting());

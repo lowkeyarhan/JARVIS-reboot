@@ -1,14 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Create reactor glow if it doesn't exist
   createReactorGlow();
-
-  // Create circuit pattern
   createCircuitPattern();
-
-  // Create circuit elements
   createCircuitElements();
 
-  // Recreate elements when window is resized
   window.addEventListener("resize", () => {
     const existingElements = document.querySelectorAll(
       ".circuit-line, .circuit-dot"
@@ -19,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function createReactorGlow() {
-    // Find or create reactor glow element
     let reactorGlow = document.querySelector(".reactor-glow");
     if (!reactorGlow) {
       reactorGlow = document.createElement("div");
@@ -36,15 +30,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createSecondaryGlows() {
-    // Remove existing secondary glows
     document.querySelectorAll(".secondary-glow").forEach((el) => el.remove());
 
-    // Create 3 smaller glows
     for (let i = 0; i < 3; i++) {
       const glow = document.createElement("div");
       glow.className = "secondary-glow";
 
-      // Random positions
       const top = Math.random() * 70 + 10; // 10-80% vertically
       const left = Math.random() * 70 + 10; // 10-80% horizontally
 
@@ -59,7 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createCircuitPattern() {
-    // Find or create circuit background element
     let circuitBg = document.querySelector(".circuit-background");
     if (!circuitBg) {
       circuitBg = document.createElement("div");
@@ -77,7 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Create horizontal and vertical lines
     for (let i = 0; i < 15; i++) {
-      // Horizontal line
       const hLine = document.createElement("div");
       hLine.className = "circuit-line";
       hLine.style.width = `${Math.random() * 200 + 100}px`;
@@ -86,7 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
       hLine.style.left = `${Math.random() * (width - 300)}px`;
       circuitBg.appendChild(hLine);
 
-      // Vertical line
       const vLine = document.createElement("div");
       vLine.className = "circuit-line";
       vLine.style.width = "1px";
@@ -102,7 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
       addCircuitDot(vLine, 0, parseInt(vLine.style.height));
     }
 
-    // Create energy path animation
     createEnergyPath(circuitBg, width, height);
   }
 
@@ -115,7 +102,6 @@ document.addEventListener("DOMContentLoaded", () => {
     dot.style.top = `${yOffset - 2}px`;
     line.appendChild(dot);
 
-    // Random pulse delay
     dot.style.animationDelay = `${Math.random() * 3}s`;
   }
 

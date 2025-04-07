@@ -31,21 +31,16 @@ marked.setOptions({
   sanitize: false, // Let DOMPurify handle sanitization
   highlight: function (code, lang) {
     try {
-      // Ensure code is a string
       if (typeof code !== "string") {
         code = String(code || "");
       }
-
-      // Default to plaintext if language not specified
       if (!lang || lang === "") {
         return hljs.highlightAuto(code).value;
       }
 
-      // Check if language is supported by highlight.js
       if (hljs.getLanguage(lang)) {
         return hljs.highlight(code, { language: lang }).value;
       } else {
-        // Fallback to plaintext if language not supported
         console.warn(
           `Language '${lang}' not supported by highlight.js, using plaintext`
         );
@@ -62,14 +57,13 @@ marked.setOptions({
         .replace(/'/g, "&#039;");
     }
   },
-  langPrefix: "hljs language-", // CSS language prefix
+  langPrefix: "hljs language-",
   pedantic: false,
   smartLists: true,
   smartypants: false,
   xhtml: false,
 });
 
-// Create custom renderer for enhanced formatting
 const renderer = new marked.Renderer();
 
 // Customize code blocks with language labels and copy buttons
@@ -91,7 +85,6 @@ renderer.code = function (code, language) {
       }
     }
 
-    // Special handling for JSON objects
     if (
       typeof code === "object" &&
       code !== null &&
@@ -116,7 +109,6 @@ renderer.code = function (code, language) {
     code = formatCode(code);
     validLanguage = normalizeLanguage(language || "plaintext");
 
-    // Enhanced highlighting with better error handling
     highlightedCode = hljs.highlight(code, {
       language: validLanguage,
       ignoreIllegals: true,
@@ -132,7 +124,6 @@ renderer.code = function (code, language) {
     `;
   } catch (error) {
     console.error("Error highlighting code:", error);
-    // Use our escapeHtml utility for consistent handling
     return `
       <div class="code-block">
         <div class="code-block-header">
@@ -147,7 +138,6 @@ renderer.code = function (code, language) {
 // Customize inline code
 renderer.codespan = function (code) {
   try {
-    // Extract the actual code content if it's a token object
     if (typeof code === "object" && code !== null) {
       const extracted = extractCodeContent(code);
       if (typeof extracted === "string") {
@@ -155,10 +145,7 @@ renderer.codespan = function (code) {
       }
     }
 
-    // Use our formatter utility to handle objects and other types
     code = formatCode(code);
-
-    // Use our escapeHtml utility
     const safeCode = escapeHtml(code);
 
     return `<code class="inline-code">${safeCode}</code>`;
@@ -167,11 +154,8 @@ renderer.codespan = function (code) {
     return `<code class="inline-code">Error rendering code</code>`;
   }
 };
-
-// Update marked to use our custom renderer
 marked.use({ renderer });
 
-// Function to safely render markdown
 function renderMarkdown(content) {
   if (!content) return { __html: "" };
 
@@ -334,7 +318,7 @@ function MainContainer() {
 
       // Add copy functionality for code blocks - safer implementation
       document.querySelectorAll(".copy-btn").forEach((button) => {
-        button.removeEventListener("click", handleCopyClick); // Remove existing listeners
+        button.removeEventListener("click", handleCopyClick);
         button.addEventListener("click", handleCopyClick);
       });
     } catch (error) {
@@ -342,7 +326,6 @@ function MainContainer() {
     }
   }, [activeMessages]);
 
-  // Auto-resize textarea based on content
   const textareaRef = useRef(null);
 
   const resizeTextarea = () => {
@@ -487,7 +470,6 @@ function MainContainer() {
             <span class="copy-text">Copied!</span>
           `;
 
-          // Reset button after a delay
           setTimeout(() => {
             if (copyButton.parentNode) {
               copyButton.innerHTML = originalContent;
@@ -496,7 +478,6 @@ function MainContainer() {
         })
         .catch((err) => {
           console.error("Failed to copy:", err);
-          // Show error feedback
           copyButton.innerHTML = `
             <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon" style="fill: #f85149;">
               <path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
@@ -520,7 +501,6 @@ function MainContainer() {
 
       <div className="chat-container" ref={chatContainerRef}>
         {activeMessages.map((message, index) => {
-          // Skip the first message (system message)
           if (index === 0) return null;
 
           return (
@@ -544,7 +524,6 @@ function MainContainer() {
                 ) : (
                   <ErrorBoundary
                     resetError={() => {
-                      // Optional: Add reset functionality if needed
                       console.log("Attempting to reset error");
                     }}
                   >

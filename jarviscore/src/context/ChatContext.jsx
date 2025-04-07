@@ -2,19 +2,10 @@ import { createContext, useState, useContext, useEffect } from "react";
 
 // Create the context
 const ChatContext = createContext();
-
-// Custom hook to use the context
 export const useChat = () => useContext(ChatContext);
-
-// Chat Provider component
 export function ChatProvider({ children }) {
-  // Active conversation ID
   const [activeConversationId, setActiveConversationId] = useState(null);
-
-  // All conversations with their messages
   const [conversations, setConversations] = useState([]);
-
-  // Current active messages
   const [activeMessages, setActiveMessages] = useState([
     {
       id: 1,
@@ -46,7 +37,6 @@ export function ChatProvider({ children }) {
     setActiveMessages(newConversation.messages);
   };
 
-  // Switch to an existing conversation
   const switchConversation = (conversationId) => {
     const conversation = conversations.find((c) => c.id === conversationId);
     if (conversation) {
@@ -55,7 +45,6 @@ export function ChatProvider({ children }) {
     }
   };
 
-  // Update messages in the active conversation
   const updateActiveMessages = (newMessages) => {
     setActiveMessages(newMessages);
 
@@ -72,7 +61,6 @@ export function ChatProvider({ children }) {
 
   // Update conversation title
   const updateConversationTitle = (conversationId, firstUserMessage) => {
-    // Generate a title based on the first user message
     const title =
       firstUserMessage.length > 30
         ? firstUserMessage.substring(0, 30) + "..."
@@ -113,7 +101,6 @@ export function ChatProvider({ children }) {
     if (conversations.length === 0) {
       startNewConversation();
     } else if (!activeConversationId) {
-      // Set the first conversation as active by default
       switchConversation(conversations[0].id);
     }
   }, []);
