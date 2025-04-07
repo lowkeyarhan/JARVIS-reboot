@@ -10,8 +10,6 @@ import "../styles/markdown.css";
 import "../styles/syntax-highlighting.css";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
-import { enhanceCodeBlocks } from "../utils/codeHandler.js";
-import { enhanceImages } from "../utils/imageHandler.js";
 
 // Configure marked options for security and customization
 marked.setOptions({
@@ -83,14 +81,6 @@ function MainContainer() {
         chatContainerRef.current.scrollHeight;
     }
   }, [activeMessages, isLoading]);
-
-  // Process markdown, code blocks and images after messages update
-  useEffect(() => {
-    setTimeout(() => {
-      enhanceCodeBlocks();
-      enhanceImages();
-    }, 100);
-  }, [activeMessages]);
 
   // Auto-resize textarea based on content
   const textareaRef = useRef(null);
@@ -210,30 +200,6 @@ function MainContainer() {
     }
   };
 
-  // Process message content with markdown
-  const renderMarkdown = (content) => {
-    // Apply Markdown parsing
-    let htmlContent = DOMPurify.sanitize(marked.parse(content || ""));
-
-    // Process code blocks with enhanced styling
-    htmlContent = htmlContent.replace(
-      /<pre><code( class="language-(\w+)")?>([^<]+)<\/code><\/pre>/g,
-      (match, langClass, language = "plaintext", code) => {
-        const decodedCode = code
-          .replace(/&lt;/g, "<")
-          .replace(/&gt;/g, ">")
-          .replace(/&amp;/g, "&");
-        return `<div class="code-block"><span class="language-label">${
-          language || "plaintext"
-        }</span><button class="copy-btn">Copy</button><pre><code class="language-${
-          language || "plaintext"
-        }">${decodedCode}</code></pre></div>`;
-      }
-    );
-
-    return { __html: htmlContent };
-  };
-
   // Handle attachment clicks
   const handleAttachmentClick = (type) => {
     console.log(`Attachment clicked: ${type}`);
@@ -280,10 +246,7 @@ function MainContainer() {
                 {message.role === "user" ? (
                   <p>{message.content}</p>
                 ) : (
-                  <div
-                    className="markdown-content"
-                    dangerouslySetInnerHTML={renderMarkdown(message.content)}
-                  />
+                  <div className="markdown-content">{message.content}</div>
                 )}
               </div>
               <div className="message-decorations">

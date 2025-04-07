@@ -24,9 +24,12 @@
 
   /* J.A.R.V.I.S. theme colors */
   --jarvis-blue: #0055ff;
+  --jarvis-blue-light: rgba(0, 85, 255, 0.2);
   --jarvis-blue-glow: rgba(0, 85, 255, 0.15);
   --jarvis-dark: #121212;
+  --jarvis-darker: #0a0a0a;
   --jarvis-border: #222222;
+  --jarvis-success: rgba(0, 150, 0, 0.8);
 }
 
 /* Language specific styling */
@@ -110,126 +113,7 @@
   font-weight: bold;
 }
 
-/* Improved code block styling - J.A.R.V.I.S. theme */
-.code-block {
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px var(--jarvis-blue-glow);
-  border: 1px solid var(--jarvis-border);
-  margin: 1.8rem 0;
-  position: relative;
-  background-color: rgba(18, 18, 18, 0.95);
-  overflow: hidden;
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
-}
-
-.code-block:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 20px var(--jarvis-blue-glow);
-  transform: translateY(-2px);
-}
-
-.code-block::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 36px;
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.8),
-    rgba(0, 85, 255, 0.05)
-  );
-  border-bottom: 1px solid rgba(0, 85, 255, 0.3);
-  z-index: 1;
-}
-
-.code-block::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: var(--jarvis-blue);
-  z-index: 1;
-}
-
-.code-block .language-label {
-  position: absolute;
-  top: 9px;
-  left: 14px;
-  font-family: "Poppins", sans-serif;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
-  z-index: 2;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.code-block .copy-btn {
-  position: absolute;
-  top: 5px;
-  right: 10px;
-  padding: 4px 10px;
-  background-color: rgba(0, 85, 255, 0.2);
-  border: 1px solid rgba(0, 85, 255, 0.3);
-  border-radius: 4px;
-  cursor: pointer;
-  font-family: "Poppins", sans-serif;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.8);
-  z-index: 2;
-  transition: all 0.2s ease;
-  opacity: 0;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.code-block:hover .copy-btn {
-  opacity: 1;
-}
-
-.code-block .copy-btn:hover {
-  background-color: rgba(0, 85, 255, 0.3);
-  color: #fff;
-  box-shadow: 0 0 8px rgba(0, 85, 255, 0.4);
-}
-
-.code-block pre {
-  margin: 0;
-  padding: 46px 16px 16px 16px;
-  background-color: transparent;
-  overflow-x: auto;
-}
-
-.code-block pre code {
-  font-family: "Fira Code", "Roboto Mono", monospace;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  tab-size: 2;
-}
-
-/* Line numbers */
-.code-block .line-numbers {
-  margin-top: 36px !important;
-  padding-top: 10px !important;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-right: 1px solid var(--jarvis-border);
-}
-
-.code-block.with-line-numbers pre {
-  counter-reset: line;
-  margin-left: 3rem;
-}
-
-.line-number {
-  color: rgba(133, 133, 133, 0.8) !important;
-  font-size: 0.85rem !important;
-}
-
-/* VS Code-like scrollbar */
+/* Scrollbar styling */
 .code-block pre::-webkit-scrollbar {
   height: 8px;
   width: 8px;
@@ -249,43 +133,7 @@
   background-color: rgba(0, 85, 255, 0.5);
 }
 
-/* Copy feedback animation */
-@keyframes copy-feedback {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  10% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  90% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-}
-
-.copy-feedback {
-  background-color: rgba(0, 150, 0, 0.8) !important;
-  border: 1px solid rgba(0, 150, 0, 0.5) !important;
-  border-radius: 4px !important;
-  color: white !important;
-  padding: 4px 10px !important;
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  font-size: 0.75rem !important;
-  font-family: "Poppins", sans-serif !important;
-  animation: copy-feedback 1.5s forwards !important;
-  z-index: 10;
-  box-shadow: 0 0 10px rgba(0, 150, 0, 0.4) !important;
-}
-
-/* Improve selected text highlighting */
+/* Selection styling */
 .code-block pre code::selection,
 .code-block pre::selection {
   background-color: rgba(0, 85, 255, 0.3);

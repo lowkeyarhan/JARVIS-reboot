@@ -39,43 +39,16 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap"
     />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap"
+    />
   </head>
 
   <body>
     <div id="root"></div>
-    <!-- Highlight.js script -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <!-- Common programming languages -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/css.min.js"></script>
-    <script>
-      // Initialize highlight.js
-      document.addEventListener("DOMContentLoaded", () => {
-        window.hljs = hljs;
-        // Apply highlighting to any new code blocks
-        const applyHighlighting = () => {
-          document.querySelectorAll("pre code:not(.hljs)").forEach((block) => {
-            hljs.highlightBlock(block);
-          });
-        };
 
-        // Set up a mutation observer to detect new code blocks
-        const observer = new MutationObserver(applyHighlighting);
-        observer.observe(document.body, {
-          childList: true,
-          subtree: true,
-        });
-
-        // Initial highlighting
-        applyHighlighting();
-      });
-    </script>
+    <!-- Main application script -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
