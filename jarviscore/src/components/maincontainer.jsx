@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Component } from "react";
 import MainHeader from "../containers/mainheader.jsx";
 import ThinkingAnimation from "./ThinkingAnimation.jsx";
 import generateGeminiResponse, {
@@ -8,17 +8,251 @@ import { useChat } from "../context/ChatContext.jsx";
 import "../styles/maincontainer.css";
 import "../styles/markdown.css";
 import "../styles/syntax-highlighting.css";
+import "../styles/code-formatting.css";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
+import hljs from "highlight.js";
+import { enhanceImages } from "../utils/imageHandler.js";
+import {
+  formatCode,
+  normalizeLanguage,
+  escapeHtml,
+  formatJsonWithHighlighting,
+  extractCodeContent,
+} from "../utils/codeFormatter.js";
 
 // Configure marked options for security and customization
 marked.setOptions({
   gfm: true, // Enable GitHub Flavored Markdown
   breaks: true, // Add <br> on single line breaks
-  headerIds: false, // Disable automatic header IDs
+  headerIds: true, // Enable automatic header IDs
   mangle: false, // Disable mangling email addresses
   sanitize: false, // Let DOMPurify handle sanitization
+  highlight: function (code, lang) {
+    try {
+      // Ensure code is a string
+      if (typeof code !== "string") {
+        code = String(code || "");
+      }
+
+      // Default to plaintext if language not specified
+      if (!lang || lang === "") {
+        return hljs.highlightAuto(code).value;
+      }
+
+      // Check if language is supported by highlight.js
+      if (hljs.getLanguage(lang)) {
+        return hljs.highlight(code, { language: lang }).value;
+      } else {
+        // Fallback to plaintext if language not supported
+        console.warn(
+          `Language '${lang}' not supported by highlight.js, using plaintext`
+        );
+        return hljs.highlight(code, { language: "plaintext" }).value;
+      }
+    } catch (error) {
+      console.error("Highlight.js error:", error);
+      // Fallback to plaintext with escaped HTML
+      return code
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  },
+  langPrefix: "hljs language-", // CSS language prefix
+  pedantic: false,
+  smartLists: true,
+  smartypants: false,
+  xhtml: false,
 });
+
+// Create custom renderer for enhanced formatting
+const renderer = new marked.Renderer();
+
+// Customize code blocks with language labels and copy buttons
+renderer.code = function (code, language) {
+  let validLanguage = "plaintext";
+  let highlightedCode = "";
+
+  try {
+    // Extract the actual code content if it's a token object
+    if (typeof code === "object" && code !== null) {
+      const extracted = extractCodeContent(code);
+      if (typeof extracted === "string") {
+        code = extracted;
+      }
+    }
+
+    // Special handling for JSON objects
+    if (
+      typeof code === "object" &&
+      code !== null &&
+      (language === "json" || !language)
+    ) {
+      validLanguage = "json";
+
+      // Use our special JSON formatter
+      highlightedCode = formatJsonWithHighlighting(code);
+
+      return `
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>${validLanguage}</span>
+          </div>
+          <pre><code>${highlightedCode}</code></pre>
+        </div>
+      `;
+    }
+
+    // For regular code blocks
+    code = formatCode(code);
+    validLanguage = normalizeLanguage(language || "plaintext");
+
+    // Enhanced highlighting with better error handling
+    highlightedCode = hljs.highlight(code, {
+      language: validLanguage,
+      ignoreIllegals: true,
+    }).value;
+
+    return `
+      <div class="code-block">
+        <div class="code-block-header">
+          <span>${validLanguage}</span>
+        </div>
+        <pre><code>${highlightedCode}</code></pre>
+      </div>
+    `;
+  } catch (error) {
+    console.error("Error highlighting code:", error);
+    // Use our escapeHtml utility for consistent handling
+    return `
+      <div class="code-block">
+        <pre><code>${escapeHtml(code)}</code></pre>
+      </div>
+    `;
+  }
+};
+
+// Customize inline code
+renderer.codespan = function (code) {
+  try {
+    // Extract the actual code content if it's a token object
+    if (typeof code === "object" && code !== null) {
+      const extracted = extractCodeContent(code);
+      if (typeof extracted === "string") {
+        code = extracted;
+      }
+    }
+
+    // Use our formatter utility to handle objects and other types
+    code = formatCode(code);
+
+    // Use our escapeHtml utility
+    const safeCode = escapeHtml(code);
+
+    return `<code class="inline-code">${safeCode}</code>`;
+  } catch (error) {
+    console.error("Error rendering inline code:", error);
+    return `<code class="inline-code">Error rendering code</code>`;
+  }
+};
+
+// Update marked to use our custom renderer
+marked.use({ renderer });
+
+// Function to safely render markdown
+function renderMarkdown(content) {
+  if (!content) return { __html: "" };
+
+  try {
+    // Format content if it's not a string (using our utility)
+    if (typeof content !== "string") {
+      content = formatCode(content);
+    }
+
+    // Parse markdown to HTML
+    const rawHtml = marked(content);
+
+    // Sanitize HTML to prevent XSS
+    const sanitizedHtml = DOMPurify.sanitize(rawHtml, {
+      ADD_TAGS: ["iframe", "svg", "path"],
+      ADD_ATTR: [
+        "allow",
+        "allowfullscreen",
+        "frameborder",
+        "scrolling",
+        "data-code",
+        "aria-hidden",
+        "viewBox",
+        "fill-rule",
+        "height",
+        "width",
+        "version",
+        "class",
+      ],
+    });
+
+    return { __html: sanitizedHtml };
+  } catch (error) {
+    console.error("Error rendering markdown:", error);
+    return { __html: `<p>Error rendering content: ${error.message}</p>` };
+  }
+}
+
+// Error Boundary Component to prevent crashes
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    this.setState({
+      error: error,
+      errorInfo: errorInfo,
+    });
+    console.error("Error in component:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error-boundary-fallback">
+          <svg
+            aria-hidden="true"
+            height="16"
+            viewBox="0 0 16 16"
+            version="1.1"
+            width="16"
+            className="error-icon"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M8 0a8 8 0 100 16A8 8 0 008 0zM5 8a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zM5.32 11.636a.5.5 0 01.136-.677c1.452-1.013 3.992-1.013 5.444 0a.5.5 0 01-.272.92 6.5 6.5 0 01-5.173 0 .5.5 0 01-.135-.243z"
+            ></path>
+          </svg>
+          <p>There was a problem rendering this content.</p>
+          {this.state.error && (
+            <div className="error-details">
+              <pre>{this.state.error.toString()}</pre>
+            </div>
+          )}
+          {this.props.resetError && (
+            <button onClick={this.props.resetError}>Try Again</button>
+          )}
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 function MainContainer() {
   const [inputMessage, setInputMessage] = useState("");
@@ -81,6 +315,21 @@ function MainContainer() {
         chatContainerRef.current.scrollHeight;
     }
   }, [activeMessages, isLoading]);
+
+  // Process and enhance images after markdown is rendered
+  useEffect(() => {
+    try {
+      enhanceImages();
+
+      // Add copy functionality for code blocks - safer implementation
+      document.querySelectorAll(".copy-btn").forEach((button) => {
+        button.removeEventListener("click", handleCopyClick); // Remove existing listeners
+        button.addEventListener("click", handleCopyClick);
+      });
+    } catch (error) {
+      console.error("Error in post-render processing:", error);
+    }
+  }, [activeMessages]);
 
   // Auto-resize textarea based on content
   const textareaRef = useRef(null);
@@ -206,6 +455,54 @@ function MainContainer() {
     // TODO: Implement attachment functionality
   };
 
+  // Handler for copy button clicks
+  const handleCopyClick = function () {
+    try {
+      const encodedCode = this.getAttribute("data-code");
+      if (!encodedCode) return;
+
+      const textToCopy = decodeURIComponent(encodedCode);
+      const copyButton = this;
+      const originalContent = this.innerHTML;
+
+      navigator.clipboard
+        .writeText(textToCopy)
+        .then(() => {
+          // Update button text to show success feedback
+          copyButton.innerHTML = `
+            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon" style="fill: #3fb950;">
+              <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
+            </svg>
+            <span class="copy-text">Copied!</span>
+          `;
+
+          // Reset button after a delay
+          setTimeout(() => {
+            if (copyButton.parentNode) {
+              copyButton.innerHTML = originalContent;
+            }
+          }, 2000);
+        })
+        .catch((err) => {
+          console.error("Failed to copy:", err);
+          // Show error feedback
+          copyButton.innerHTML = `
+            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon" style="fill: #f85149;">
+              <path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
+            </svg>
+            <span class="copy-text">Error!</span>
+          `;
+          setTimeout(() => {
+            if (copyButton.parentNode) {
+              copyButton.innerHTML = originalContent;
+            }
+          }, 2000);
+        });
+    } catch (error) {
+      console.error("Error copying code:", error);
+    }
+  };
+
   return (
     <div className="main-container">
       <MainHeader />
@@ -234,7 +531,17 @@ function MainContainer() {
                 {message.role === "user" ? (
                   <p>{message.content}</p>
                 ) : (
-                  <div className="markdown-content">{message.content}</div>
+                  <ErrorBoundary
+                    resetError={() => {
+                      // Optional: Add reset functionality if needed
+                      console.log("Attempting to reset error");
+                    }}
+                  >
+                    <div
+                      className="markdown-content"
+                      dangerouslySetInnerHTML={renderMarkdown(message.content)}
+                    />
+                  </ErrorBoundary>
                 )}
               </div>
               <div className="message-decorations">
