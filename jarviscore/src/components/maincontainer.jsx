@@ -371,10 +371,10 @@ function MainContainer() {
 
       // More reliable method for attaching copy functionality
       const attachCopyHandlers = () => {
-      document.querySelectorAll(".copy-btn").forEach((button) => {
+        document.querySelectorAll(".copy-btn").forEach((button) => {
           // Remove any existing listeners to prevent duplicates
-        button.removeEventListener("click", handleCopyClick);
-        button.addEventListener("click", handleCopyClick);
+          button.removeEventListener("click", handleCopyClick);
+          button.addEventListener("click", handleCopyClick);
         });
       };
 
@@ -462,7 +462,7 @@ function MainContainer() {
               copyButton.innerHTML = originalContent;
               copyButton.classList.remove("copy-success");
             }
-          }, 2000);
+          }, 5000);
         })
         .catch((error) => {
           // Error state
@@ -513,7 +513,7 @@ function MainContainer() {
                     copyButton.innerHTML = originalContent;
                     copyButton.classList.remove("copy-success");
                   }
-                }, 2000);
+                }, 5000);
               }
             } catch (fallbackError) {
               console.error("Fallback copy method failed:", fallbackError);
