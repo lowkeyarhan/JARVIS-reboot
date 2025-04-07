@@ -474,7 +474,6 @@
     rgba(0, 85, 255, 1),
     rgba(0, 85, 255, 0.8)
   );
-  transform: translateY(-2px);
   box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 85, 255, 0.3);
 }
 

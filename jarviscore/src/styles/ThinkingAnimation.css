@@ -7,7 +7,6 @@
   width: 100%;
   background-color: transparent;
   border-radius: 12px;
-  margin-bottom: 20px;
   box-shadow: none;
   min-height: 120px;
   position: relative;
@@ -161,24 +160,6 @@
   left: 0;
   transform-origin: center;
   transform: translateY(-50%) rotate(-45deg);
-}
-
-.thinking-animation::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(0, 85, 255, 0.1) 0%,
-    transparent 70%
-  );
-  transform: translate(-50%, -50%);
-  z-index: -1;
-  animation: backgroundPulse 4s infinite alternate;
 }
 
 .thinking-animation::after {
