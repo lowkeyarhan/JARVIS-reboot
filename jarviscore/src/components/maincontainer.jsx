@@ -320,8 +320,10 @@ function MainContainer() {
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth", // Enable smooth scrolling
+      });
     }
   }, [activeMessages, isLoading]);
 
