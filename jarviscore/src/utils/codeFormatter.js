@@ -6,6 +6,46 @@
  */
 
 /**
+ * Extracts the language from code objects
+ * @param {any} content - The code content object
+ * @param {string} defaultLanguage - Default language to use if none found
+ * @returns {string} - The language for syntax highlighting
+ */
+export function extractLanguage(content, defaultLanguage = "plaintext") {
+  // If it's not an object or null, return default
+  if (typeof content !== "object" || content === null) {
+    return defaultLanguage;
+  }
+
+  // If it has a lang property (common in code tokens), use that
+  if (content.lang !== undefined) {
+    return content.lang;
+  }
+
+  // Check for language in different properties
+  if (content.language !== undefined) {
+    return content.language;
+  }
+
+  // Try to detect language from common object structures
+  if (typeof content === "object") {
+    if (content.type === "code" && content.lang) {
+      return content.lang;
+    }
+
+    // Special case for Java objects
+    if (
+      (content.raw && content.raw.includes("java")) ||
+      (content.text && content.text.includes("java"))
+    ) {
+      return "java";
+    }
+  }
+
+  return defaultLanguage;
+}
+
+/**
  * Extracts the actual code content from code objects
  * @param {any} content - The code content which might be an object with metadata
  * @returns {string} - The actual code content to display

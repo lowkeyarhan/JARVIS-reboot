@@ -19,6 +19,7 @@ import {
   escapeHtml,
   formatJsonWithHighlighting,
   extractCodeContent,
+  extractLanguage,
 } from "../utils/codeFormatter.js";
 
 // Configure marked options for security and customization
@@ -77,8 +78,13 @@ renderer.code = function (code, language) {
   let highlightedCode = "";
 
   try {
-    // Extract the actual code content if it's a token object
+    // Extract language from the code object if it exists
     if (typeof code === "object" && code !== null) {
+      // Use the language from the object or fall back to the provided language
+      const extractedLang = extractLanguage(code, language || "plaintext");
+      language = extractedLang || language;
+
+      // Extract the actual code content
       const extracted = extractCodeContent(code);
       if (typeof extracted === "string") {
         code = extracted;
@@ -129,6 +135,9 @@ renderer.code = function (code, language) {
     // Use our escapeHtml utility for consistent handling
     return `
       <div class="code-block">
+        <div class="code-block-header">
+          <span>code</span>
+        </div>
         <pre><code>${escapeHtml(code)}</code></pre>
       </div>
     `;

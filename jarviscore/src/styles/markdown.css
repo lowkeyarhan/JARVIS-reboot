@@ -161,11 +161,8 @@
   background-color: #0d1117;
   overflow: hidden;
   position: relative;
-  border: 1px solid #30363d;
   max-width: 100%;
   display: block;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-    "Liberation Mono", monospace;
 }
 
 /* Code block header - GitHub style */
@@ -174,7 +171,6 @@
   justify-content: space-between;
   align-items: center;
   background-color: #161b22;
-  padding: 8px 16px;
   border-bottom: 1px solid #30363d;
 }
 
