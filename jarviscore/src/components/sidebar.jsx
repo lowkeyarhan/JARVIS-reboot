@@ -29,9 +29,15 @@ function Sidebar() {
         <div className="new-chat">
           <button className="new-chat-button" onClick={startNewConversation}>
             <span className="icon">
-              <i className="fa-solid fa-bolt"></i>
+              <i className="fa-solid fa-comment-dots"></i>
             </span>
-            New chat
+            New
+          </button>
+          <button className="new-chat-button imagine-button">
+            <span className="icon">
+              <i className="fa-solid fa-wand-magic-sparkles"></i>
+            </span>
+            Imagine
           </button>
         </div>
       </div>

@@ -1,62 +1,103 @@
-/* GitHub-style Syntax Highlighting */
+/* Exact VS Code Syntax Highlighting */
 :root {
-  --gh-syntax-bg: #1e1e1e;
-  --gh-syntax-bg-alt: #252526;
-  --gh-syntax-text: #d4d4d4;
-  --gh-syntax-comment: #6a9955;
-  --gh-syntax-constant: #569cd6;
-  --gh-syntax-entity: #4ec9b0;
-  --gh-syntax-keyword: #c586c0;
-  --gh-syntax-string: #ce9178;
-  --gh-syntax-variable: #9cdcfe;
-  --gh-syntax-markup-section: #d7ba7d;
-  --gh-syntax-markup-name: #4fc1ff;
-  --gh-syntax-markup-attribute: #9cdcfe;
-  --gh-syntax-markup-deleted: #f44747;
-  --gh-syntax-markup-inserted: #b5cea8;
-  --gh-syntax-border: #3c3c3c;
-  --gh-syntax-border-focus: #007acc;
+  --vscode-bg: #1e1e1e;
+  --vscode-bg-alt: #252526;
+  --vscode-text: #d4d4d4;
+  --vscode-comment: #936ca3f6;
+  --vscode-keyword: #569cd6;
+  --vscode-control: #c586c0;
+  --vscode-string: #ce9178;
+  --vscode-number: #b5cea8;
+  --vscode-function: #dcdcaa;
+  --vscode-variable: #9cdcfe;
+  --vscode-class: #4ec9b0;
+  --vscode-interface: #4ec9b0;
+  --vscode-type: #4ec9b0;
+  --vscode-operator: #d4d4d4;
+  --vscode-parameter: #9cdcfe;
+  --vscode-property: #9cdcfe;
+  --vscode-enum: #b8d7a3;
+  --vscode-tag: #569cd6;
+  --vscode-json-key: #9cdcfe;
+  --vscode-json-string: #ce9178;
+  --vscode-json-number: #b5cea8;
+  --vscode-json-boolean: #569cd6;
+  --vscode-json-null: #569cd6;
 }
 
 /* Main background */
 .code-block {
   margin: 1rem 0;
   overflow: hidden;
+  background-color: var(--vscode-bg);
+  border-radius: 3px;
+  border: 1px solid #3c3c3c;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .code-block-header {
-  border-bottom: 1px solid var(--gh-syntax-border);
-  font-family: "Poppins", sans-serif;
-  font-size: 0.875rem;
+  border-bottom: 1px solid #3c3c3c;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, "Droid Sans", "Helvetica Neue", sans-serif;
+  font-size: 0.8rem;
+  background-color: var(--vscode-bg-alt);
+  padding: 6px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #888;
+}
+
+/* Code block content */
+.code-block pre {
+  margin: 0;
+  padding: 12px 16px;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  overflow-x: auto;
+}
+
+.code-block code {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  tab-size: 4;
 }
 
 /* Token styling */
 .hljs {
-  color: var(--gh-syntax-text);
+  color: var(--vscode-text) !important;
   background: transparent;
 }
 
 /* Comments */
 .hljs-comment,
 .hljs-quote {
-  color: var(--gh-syntax-comment);
+  color: var(--vscode-comment) !important;
   font-style: italic;
 }
 
-/* Keywords, control flow, operators */
-.hljs-keyword,
+/* Keywords */
+.hljs-keyword {
+  color: var(--vscode-keyword) !important;
+}
+
+/* Control keywords */
 .hljs-selector-tag,
 .hljs-meta-keyword,
 .hljs-doctag,
 .hljs-section {
-  color: var(--gh-syntax-keyword);
-  font-weight: 600;
+  color: var(--vscode-control) !important;
 }
 
 /* Strings, URLs */
 .hljs-string,
 .hljs-attribute {
-  color: var(--gh-syntax-string);
+  color: var(--vscode-string) !important;
 }
 
 /* Variable names, attributes, parameters */
@@ -66,88 +107,84 @@
 .hljs-selector-pseudo,
 .hljs-selector-class,
 .hljs-selector-id {
-  color: var(--gh-syntax-variable);
+  color: var(--vscode-variable) !important;
 }
 
 /* Numbers, boolean values, null */
 .hljs-number,
-.hljs-literal,
+.hljs-literal {
+  color: var(--vscode-number) !important;
+}
+
+/* Types */
 .hljs-type,
 .hljs-params {
-  color: var(--gh-syntax-constant);
+  color: var(--vscode-type) !important;
 }
 
 /* Function names */
 .hljs-title,
-.hljs-title.class_,
 .hljs-title.function_ {
-  color: var(--gh-syntax-entity);
+  color: var(--vscode-function) !important;
 }
 
 /* Class names */
+.hljs-title.class_,
 .hljs-class .hljs-title {
-  color: var(--gh-syntax-entity);
-}
-
-/* CSS selectors */
-.hljs-selector-tag,
-.hljs-selector-class,
-.hljs-selector-id {
-  color: var(--gh-syntax-markup-name);
+  color: var(--vscode-class) !important;
 }
 
 /* Tags */
 .hljs-tag,
 .hljs-name {
-  color: var(--gh-syntax-entity);
+  color: var(--vscode-tag) !important;
 }
 
-/* Markup - HTML */
-.hljs-name {
-  color: var(--gh-syntax-markup-name);
+/* Operators */
+.hljs-operator {
+  color: var(--vscode-operator) !important;
 }
 
-/* Additions and deletions */
-.hljs-addition {
-  background-color: rgba(56, 139, 95, 0.15);
-  color: var(--gh-syntax-markup-inserted);
+/* Parameters */
+.hljs-params {
+  color: var(--vscode-parameter) !important;
 }
 
-.hljs-deletion {
-  background-color: rgba(210, 45, 58, 0.15);
-  color: var(--gh-syntax-markup-deleted);
+/* JSON specific styling */
+.json-key {
+  color: var(--vscode-json-key) !important;
 }
 
-/* Links */
-.hljs-link {
-  color: var(--gh-syntax-string);
-  text-decoration: underline;
+.json-string {
+  color: var(--vscode-json-string) !important;
 }
 
-/* Emphasis */
-.hljs-emphasis {
-  font-style: italic;
+.json-number {
+  color: var(--vscode-json-number) !important;
 }
 
-/* Strong */
-.hljs-strong {
-  font-weight: bold;
+.json-boolean {
+  color: var(--vscode-json-boolean) !important;
+}
+
+.json-null {
+  color: var(--vscode-json-null) !important;
 }
 
 /* Scrollbar styling */
 .code-block pre::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
+  height: 10px;
+  width: 10px;
 }
 
 .code-block pre::-webkit-scrollbar-track {
-  background-color: var(--gh-syntax-bg);
-  border-radius: 4px;
+  background-color: var(--vscode-bg);
 }
 
 .code-block pre::-webkit-scrollbar-thumb {
-  background-color: var(--gh-syntax-border);
-  border-radius: 4px;
+  background-color: #424242;
+  border-radius: 3px;
+  border: 2px solid var(--vscode-bg);
 }
 
 .code-block pre::-webkit-scrollbar-thumb:hover {
@@ -157,28 +194,28 @@
 /* Selection styling */
 .code-block pre code::selection,
 .code-block pre::selection {
-  background-color: rgba(56, 139, 253, 0.15);
+  background-color: rgba(64, 83, 130, 0.6);
 }
 
 /* Line highlighting and line numbers */
 .code-block .line-highlight {
-  background-color: rgba(110, 118, 129, 0.1);
+  background-color: rgba(55, 71, 79, 0.4);
   display: block;
   margin-left: -16px;
   margin-right: -16px;
   padding-left: 16px;
   padding-right: 16px;
-  border-left: 2px solid #388bfd;
+  border-left: 2px solid #569cd6;
 }
 
 .code-block .line-number {
   user-select: none;
-  color: var(--gh-syntax-comment);
+  color: #6e7681;
   opacity: 0.6;
   display: inline-block;
   width: 1.5em;
   text-align: right;
   margin-right: 1em;
-  border-right: 1px solid var(--gh-syntax-border);
+  border-right: 1px solid #3c3c3c;
   padding-right: 0.5em;
 }

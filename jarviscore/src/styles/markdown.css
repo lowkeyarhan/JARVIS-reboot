@@ -248,7 +248,7 @@
   background: transparent;
 }
 
-/* Inline code - GitHub style */
+/* Inline code - GitHub style
 .markdown-content p code,
 .markdown-content li code,
 .markdown-content td code,
@@ -259,7 +259,7 @@
   font-family: "Fira Code", monospace;
   font-size: 85%;
   white-space: break-spaces;
-}
+} */
 
 /* Tables */
 .markdown-content table {

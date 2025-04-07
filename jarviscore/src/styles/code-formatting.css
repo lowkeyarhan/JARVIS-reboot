@@ -46,8 +46,8 @@
 
 .code-block code {
   font-family: "Fira Code", monospace;
-  font-size: 13px !important;
-  color: #d4d4d4; /* VS Code text color */ 
+  font-size: 14px !important;
+  color: #d4d4d4;
   padding: 0;
   white-space: pre;
   word-break: normal;
@@ -72,81 +72,6 @@
   max-width: 100%;
   display: inline-block;
   vertical-align: middle;
-}
-
-/* VS Code-like syntax highlighting */
-/* Keywords */
-.hljs-keyword,
-.hljs-selector-tag,
-.hljs-addition {
-  color: #c586c0; /* VS Code keyword purple */
-}
-
-/* Strings */
-.hljs-string,
-.hljs-attribute,
-.hljs-selector-value {
-  color: #ce9178; /* VS Code string orange/brown */
-}
-
-/* Numbers, null, booleans */
-.hljs-number,
-.hljs-literal,
-.hljs-type,
-.hljs-params {
-  color: #b5cea8; /* VS Code number green */
-}
-
-/* Comments */
-.hljs-comment,
-.hljs-quote,
-.hljs-deletion {
-  color: #6a9955; /* VS Code comment green */
-  font-style: italic;
-}
-
-/* Function names */
-.hljs-title,
-.hljs-section,
-.hljs-title.function_ {
-  color: #dcdcaa; /* VS Code function yellow */
-}
-
-/* Class names, tags */
-.hljs-class .hljs-title,
-.hljs-tag,
-.hljs-name {
-  color: #4ec9b0; /* VS Code class/tag teal */
-}
-
-/* Variables */
-.hljs-variable,
-.hljs-attr,
-.hljs-template-variable {
-  color: #9cdcfe; /* VS Code variable blue */
-}
-
-/* Properties */
-.hljs-property {
-  color: #9cdcfe;
-}
-
-/* JSON styling */
-.code-block .json-key {
-  color: #9cdcfe; /* VS Code JSON key blue */
-}
-
-.code-block .json-string {
-  color: #ce9178; /* VS Code JSON string orange */
-}
-
-.code-block .json-number,
-.code-block .json-boolean {
-  color: #b5cea8; /* VS Code JSON number/boolean green */
-}
-
-.code-block .json-null {
-  color: #569cd6; /* VS Code null blue */
 }
 
 /* Handle long lines */
@@ -185,9 +110,9 @@
   font-weight: 500;
 }
 
-.code-object-value {
-  color: #ce9178; /* VS Code value orange */
-}
+/* .code-object-value {
+  color: #ce9178;
+} */
 
 /* Enhance readability for nested JSON */
 .code-block pre code .indent-1 {
