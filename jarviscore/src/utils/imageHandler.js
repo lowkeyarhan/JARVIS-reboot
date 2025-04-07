@@ -129,7 +129,7 @@ export function enhanceImages() {
  * @param {string} src - The image source URL
  * @param {string} alt - The image alt text (caption)
  */
-function createLightbox(src, alt) {
+export function createLightbox(src, alt) {
   // Check if lightbox already exists
   let lightbox = document.getElementById("image-lightbox");
 
@@ -252,6 +252,15 @@ function createLightbox(src, alt) {
   closeBtn.style.alignItems = "center";
   closeBtn.style.justifyContent = "center";
   closeBtn.style.borderRadius = "50%";
+  closeBtn.style.transition = "background-color 0.2s ease";
+
+  closeBtn.addEventListener("mouseenter", () => {
+    closeBtn.style.backgroundColor = "rgba(255, 255, 255, 0.2)";
+  });
+
+  closeBtn.addEventListener("mouseleave", () => {
+    closeBtn.style.backgroundColor = "transparent";
+  });
 
   closeBtn.addEventListener("click", () => {
     lightbox.style.opacity = "0";

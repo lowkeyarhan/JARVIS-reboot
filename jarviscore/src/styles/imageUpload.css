@@ -1,0 +1,38 @@
+.image-upload-container {
+  position: relative;
+  width: auto;
+  margin: 0 10px;
+  height: auto;
+  display: flex;
+  align-items: center;
+  z-index: 10;
+}
+
+.file-input {
+  display: none;
+}
+
+/* Image icon animation when image is selected */
+@keyframes imagePulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 5px rgba(10, 132, 255, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(10, 132, 255, 0);
+  }
+}
+
+.image-selected {
+  background-color: rgba(10, 132, 255, 0.2) !important;
+  animation: imagePulse 1.5s infinite !important;
+}
+
+.image-selected i {
+  color: rgba(10, 132, 255, 0.9) !important;
+}

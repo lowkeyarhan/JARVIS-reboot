@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, Component } from "react";
 import MainHeader from "../containers/mainheader.jsx";
 import ThinkingAnimation from "./ThinkingAnimation.jsx";
+import VoiceToText from "./VoiceToText.jsx";
+import ImageUpload from "./ImageUpload.jsx";
 import generateGeminiResponse, {
   checkApiStatus,
 } from "../services/geminiApi.js";
@@ -12,7 +14,7 @@ import "../styles/code-formatting.css";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import hljs from "highlight.js";
-import { enhanceImages } from "../utils/imageHandler.js";
+import { enhanceImages, createLightbox } from "../utils/imageHandler.js";
 import {
   formatCode,
   normalizeLanguage,
@@ -293,6 +295,12 @@ function MainContainer() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiAvailable, setApiAvailable] = useState(true);
   const [currentTime, setCurrentTime] = useState(Date.now());
+
+  // State for voice and image features
+  const [isVoiceActive, setIsVoiceActive] = useState(false);
+  const [isImageUploadActive, setIsImageUploadActive] = useState(false);
+  const [imageSelected, setImageSelected] = useState(false);
+
   const chatContainerRef = useRef(null);
 
   const {
@@ -401,129 +409,6 @@ function MainContainer() {
       console.error("Error setting up copy functionality:", error);
     }
   }, [activeMessages]);
-
-  const textareaRef = useRef(null);
-
-  const resizeTextarea = () => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
-    }
-  };
-
-  useEffect(() => {
-    resizeTextarea();
-  }, [inputMessage]);
-
-  const handleInputChange = (e) => {
-    setInputMessage(e.target.value);
-  };
-
-  // Handle enter key submission
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (inputMessage.trim() === "" || isLoading) return;
-
-    // Check if API is available
-    if (!apiAvailable) {
-      const apiErrorMessage = {
-        id: Date.now(),
-        role: "assistant",
-        content:
-          "I'm sorry, sir. I'm currently unable to process requests due to connectivity issues with my core systems. Please check the API key configuration.",
-        timestamp: Date.now(),
-      };
-
-      // Add user message
-      const userMessage = {
-        id: Date.now() - 1,
-        role: "user",
-        content: inputMessage,
-        timestamp: Date.now(),
-      };
-
-      updateActiveMessages([...activeMessages, userMessage, apiErrorMessage]);
-      setInputMessage("");
-      return;
-    }
-
-    // Add user message
-    const userMessage = {
-      id: Date.now(),
-      role: "user",
-      content: inputMessage,
-      timestamp: Date.now(),
-    };
-
-    const updatedMessages = [...activeMessages, userMessage];
-    updateActiveMessages(updatedMessages);
-
-    // If this is the first user message in the conversation, use it as the title
-    if (activeMessages.length === 1) {
-      updateConversationTitle(activeConversationId, inputMessage);
-    }
-
-    setInputMessage("");
-    setIsLoading(true);
-
-    try {
-      // Get AI response from Gemini
-      const aiResponseText = await generateGeminiResponse(updatedMessages);
-
-      // Add AI response to messages
-      const aiResponse = {
-        id: Date.now() + 1,
-        role: "assistant",
-        content: aiResponseText,
-        timestamp: Date.now(),
-      };
-
-      updateActiveMessages([...updatedMessages, aiResponse]);
-    } catch (error) {
-      console.error("Error getting AI response:", error);
-
-      // Simple error message
-      const errorMessage = {
-        id: Date.now() + 1,
-        role: "assistant",
-        content: `I'm sorry, sir. I encountered an error processing your request. My systems may need attention. Error: ${
-          error.message || "Unknown error"
-        }`,
-        timestamp: Date.now(),
-      };
-
-      updateActiveMessages([...updatedMessages, errorMessage]);
-
-      // Update API availability
-      setApiAvailable(false);
-
-      // Try to restore API availability after 10 seconds
-      setTimeout(async () => {
-        try {
-          const status = await checkApiStatus();
-          setApiAvailable(status);
-        } catch (error) {
-          console.error("Failed to restore API connection:", error);
-        }
-      }, 10000);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle attachment clicks
-  const handleAttachmentClick = (type) => {
-    console.log(`Attachment clicked: ${type}`);
-    // TODO: Implement attachment functionality
-  };
 
   // Handler for copy button clicks - improved implementation
   const handleCopyClick = function (e) {
@@ -653,6 +538,274 @@ function MainContainer() {
     }
   };
 
+  const textareaRef = useRef(null);
+
+  const resizeTextarea = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
+    }
+  };
+
+  useEffect(() => {
+    resizeTextarea();
+  }, [inputMessage]);
+
+  const handleInputChange = (e) => {
+    setInputMessage(e.target.value);
+  };
+
+  // Handle enter key submission
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
+  // Handle voice transcript
+  const handleVoiceTranscript = (transcript) => {
+    // Append transcript to existing text
+    setInputMessage((prev) => {
+      // Add space if needed
+      const needsSpace = prev.length > 0 && !prev.endsWith(" ");
+      return prev + (needsSpace ? " " : "") + transcript;
+    });
+  };
+
+  // Handle image upload
+  const handleImageUpload = (imageData) => {
+    // This function is now only a container for getCurrentImage method
+    // The actual submission happens in handleSubmit
+  };
+
+  // Handle AI response
+  const handleAIResponse = async (messages) => {
+    setIsLoading(true);
+
+    try {
+      // Get AI response from Gemini
+      const aiResponseText = await generateGeminiResponse(messages);
+
+      // Add AI response to messages
+      const aiResponse = {
+        id: Date.now() + 1,
+        role: "assistant",
+        content: aiResponseText,
+        timestamp: Date.now(),
+      };
+
+      updateActiveMessages([...messages, aiResponse]);
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+
+      // Simple error message
+      const errorMessage = {
+        id: Date.now() + 1,
+        role: "assistant",
+        content: `I'm sorry, sir. I encountered an error processing your request. My systems may need attention. Error: ${
+          error.message || "Unknown error"
+        }`,
+        timestamp: Date.now(),
+      };
+
+      updateActiveMessages([...messages, errorMessage]);
+
+      // Update API availability
+      setApiAvailable(false);
+
+      // Try to restore API availability after 10 seconds
+      setTimeout(async () => {
+        try {
+          const status = await checkApiStatus();
+          setApiAvailable(status);
+        } catch (error) {
+          console.error("Failed to restore API connection:", error);
+        }
+      }, 10000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle text submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if ((inputMessage.trim() === "" && !imageSelected) || isLoading) return;
+
+    // Check if API is available
+    if (!apiAvailable) {
+      const apiErrorMessage = {
+        id: Date.now(),
+        role: "assistant",
+        content:
+          "I'm sorry, sir. I'm currently unable to process requests due to connectivity issues with my core systems. Please check the API key configuration.",
+        timestamp: Date.now(),
+      };
+
+      // Add user message
+      const userMessage = {
+        id: Date.now() - 1,
+        role: "user",
+        content: inputMessage,
+        timestamp: Date.now(),
+      };
+
+      updateActiveMessages([...activeMessages, userMessage, apiErrorMessage]);
+      setInputMessage("");
+      return;
+    }
+
+    // Check if we have an image to upload
+    let imageData = null;
+    if (
+      imageSelected &&
+      handleImageUpload &&
+      handleImageUpload.getCurrentImage
+    ) {
+      imageData = handleImageUpload.getCurrentImage();
+      // Clear the selected image after getting the data
+      clearSelectedImage();
+    }
+
+    // Add user message with optional image
+    const userMessage = {
+      id: Date.now(),
+      role: "user",
+      content: inputMessage || (imageData ? "" : ""),
+      timestamp: Date.now(),
+      image: imageData,
+    };
+
+    // Don't proceed if no content and no image
+    if (userMessage.content.trim() === "" && !imageData) return;
+
+    const updatedMessages = [...activeMessages, userMessage];
+    updateActiveMessages(updatedMessages);
+
+    // If this is the first user message in the conversation, use it as the title
+    if (activeMessages.length === 1) {
+      updateConversationTitle(
+        activeConversationId,
+        inputMessage || "Image upload"
+      );
+    }
+
+    setInputMessage("");
+
+    // Process with AI
+    handleAIResponse(updatedMessages);
+  };
+
+  // Handle attachment clicks
+  const handleAttachmentClick = (type) => {
+    // Only handle voice activation - image handling is different now
+    if (type === "microphone") {
+      setIsVoiceActive(!isVoiceActive);
+      setIsImageUploadActive(false);
+    } else if (type === "photo") {
+      if (imageSelected && handleImageUpload) {
+        // If image is selected, clicking again will clear it
+        clearSelectedImage();
+      } else {
+        // Otherwise trigger file input to select an image
+        const fileInput = document.querySelector(".file-input");
+        if (fileInput) {
+          fileInput.click();
+        }
+      }
+    } else if (type === "files") {
+      console.log("Files attachment clicked - Not implemented yet");
+    }
+  };
+
+  // Function to clear a selected image
+  const clearSelectedImage = () => {
+    if (handleImageUpload) {
+      // Reset image state in parent component
+      if (handleImageUpload.getCurrentImage) {
+        handleImageUpload.getCurrentImage = () => null;
+      }
+      handleImageUpload.imageSelected = false;
+      setImageSelected(false);
+
+      // Reset file input if it exists
+      const fileInput = document.querySelector(".file-input");
+      if (fileInput) {
+        fileInput.value = null;
+      }
+    }
+  };
+
+  // Open image in fullscreen
+  const openImageFullscreen = (imageUrl, imageName) => {
+    if (createLightbox && imageUrl) {
+      createLightbox(imageUrl, imageName);
+    }
+  };
+
+  // Check for image selection status
+  useEffect(() => {
+    const checkImageSelection = () => {
+      if (handleImageUpload && handleImageUpload.imageSelected) {
+        setImageSelected(true);
+      } else {
+        setImageSelected(false);
+      }
+    };
+
+    // Set up an interval to check image selection status
+    checkImageSelection(); // Check immediately
+    const interval = setInterval(checkImageSelection, 300);
+
+    // Clean up interval
+    return () => clearInterval(interval);
+  }, [handleImageUpload]);
+
+  // Render custom message content based on type
+  const renderMessageContent = (message) => {
+    if (message.role === "user") {
+      return (
+        <div>
+          <p>{message.content}</p>
+          {message.image && (
+            <div className="user-image-container">
+              <img
+                src={message.image.dataUrl}
+                alt={message.image.name || "Uploaded image"}
+                className="user-image"
+                onClick={() =>
+                  openImageFullscreen(message.image.dataUrl, message.image.name)
+                }
+              />
+              <div className="image-info">
+                <span className="image-name">{message.image.name}</span>
+                <span className="image-size">
+                  {(message.image.size / 1024).toFixed(1)} KB
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    } else {
+      return (
+        <ErrorBoundary
+          resetError={() => {
+            console.log("Attempting to reset error");
+          }}
+        >
+          <div
+            className="markdown-content"
+            dangerouslySetInnerHTML={renderMarkdown(message.content)}
+          />
+        </ErrorBoundary>
+      );
+    }
+  };
+
+  // Render the component
   return (
     <div className="main-container">
       <MainHeader />
@@ -677,20 +830,7 @@ function MainContainer() {
                 </span>
               </div>
               <div className="message-content">
-                {message.role === "user" ? (
-                  <p>{message.content}</p>
-                ) : (
-                  <ErrorBoundary
-                    resetError={() => {
-                      console.log("Attempting to reset error");
-                    }}
-                  >
-                    <div
-                      className="markdown-content"
-                      dangerouslySetInnerHTML={renderMarkdown(message.content)}
-                    />
-                  </ErrorBoundary>
-                )}
+                {renderMessageContent(message)}
               </div>
               <div className="message-decorations">
                 <div className="message-corner"></div>
@@ -717,6 +857,20 @@ function MainContainer() {
         )}
       </div>
 
+      {/* Voice to Text Component */}
+      <VoiceToText
+        onTranscript={handleVoiceTranscript}
+        isActive={isVoiceActive}
+        setIsActive={setIsVoiceActive}
+      />
+
+      {/* Image Upload Component */}
+      <ImageUpload
+        onImageUpload={handleImageUpload}
+        isActive={isImageUploadActive}
+        setIsActive={setIsImageUploadActive}
+      />
+
       <div className="input-container">
         <form onSubmit={handleSubmit}>
           <textarea
@@ -726,7 +880,7 @@ function MainContainer() {
             onKeyDown={handleKeyDown}
             placeholder={
               apiAvailable
-                ? "Innitiate conversation..."
+                ? "Initiate conversation..."
                 : "API connectivity issues. Please check configuration."
             }
             rows={1}
@@ -734,7 +888,13 @@ function MainContainer() {
             disabled={isLoading}
           />
           <div className="attachments">
-            <span id="photo" onClick={() => handleAttachmentClick("photo")}>
+            <span
+              id="photo"
+              className={`${isImageUploadActive ? "active" : ""} ${
+                imageSelected ? "image-selected" : ""
+              }`}
+              onClick={() => handleAttachmentClick("photo")}
+            >
               <i className="fa-regular fa-image"></i>
             </span>
             <span id="files" onClick={() => handleAttachmentClick("files")}>
@@ -742,6 +902,7 @@ function MainContainer() {
             </span>
             <span
               id="microphone-btn"
+              className={isVoiceActive ? "active" : ""}
               onClick={() => handleAttachmentClick("microphone")}
             >
               <i className="fa-solid fa-microphone-lines"></i>
@@ -752,7 +913,11 @@ function MainContainer() {
             className={`send-button ${
               isLoading || !apiAvailable ? "disabled" : ""
             }`}
-            disabled={isLoading || inputMessage.trim() === "" || !apiAvailable}
+            disabled={
+              isLoading ||
+              !apiAvailable ||
+              (inputMessage.trim() === "" && !imageSelected)
+            }
           >
             <i className="fa-regular fa-paper-plane"></i>
           </button>
