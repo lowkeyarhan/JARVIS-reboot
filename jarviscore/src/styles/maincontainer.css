@@ -860,22 +860,65 @@
   background-color: rgba(6, 182, 212, 0.1);
 }
 
-/* Live Talk button specific styles */
+/* Live Talk button specific styles - PREMIUM VERSION */
 #live-talk-btn {
   position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(41, 128, 255, 0.2),
+    rgba(0, 212, 255, 0.3)
+  );
+  border-radius: 8px;
+  border: 1px solid rgba(0, 120, 255, 0.5);
+  transform: scale(1.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 15px rgba(0, 85, 255, 0.25),
+    inset 0 0 8px rgba(0, 170, 255, 0.2);
+  margin-left: 8px;
+  overflow: hidden;
 }
 
-#live-talk-btn::after {
+#live-talk-btn::before {
   content: "";
   position: absolute;
-  width: 8px;
-  height: 8px;
-  background-color: rgba(0, 255, 85, 0.8);
-  border-radius: 50%;
-  top: 2px;
-  right: 2px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  top: -12px;
+  right: -8px;
+  background: linear-gradient(135deg, #0062ff, #00c3ff);
+  color: white;
+  font-size: 8px;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  opacity: 1;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+
+#live-talk-btn i {
+  color: rgba(0, 155, 255, 0.9);
+  background: linear-gradient(135deg, #0095ff, #00d9ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  position: relative;
+  z-index: 1;
+}
+
+#live-talk-btn i:hover {
+  transform: rotate(15deg);
+}
+
+#live-talk-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 149, 255, 0.3),
+    rgba(0, 212, 255, 0.4)
+  );
+  box-shadow: 0 5px 15px rgba(0, 85, 255, 0.5), 0 0 25px rgba(0, 200, 255, 0.3),
+    inset 0 0 10px rgba(0, 170, 255, 0.3);
+  border-color: rgba(0, 170, 255, 0.7);
 }
 
 #live-talk-btn:hover::after {
@@ -884,18 +927,105 @@
 }
 
 #live-talk-btn.active {
-  background-color: rgba(0, 255, 85, 0.15);
-  color: rgba(0, 255, 85, 0.9);
-  box-shadow: 0 0 15px rgba(0, 255, 85, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 200, 255, 0.4),
+    rgba(0, 120, 255, 0.5)
+  );
+  color: rgba(0, 220, 255, 0.9);
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.6), 0 0 30px rgba(0, 85, 255, 0.4),
+    inset 0 0 15px rgba(0, 170, 255, 0.3);
+  border-color: rgba(0, 200, 255, 0.8);
+  transform: scale(1.15);
 }
 
 #live-talk-btn.active i {
-  color: rgba(0, 255, 85, 0.9);
+  background: linear-gradient(135deg, #00c3ff, #80e5ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.7));
+  animation: pulseText 2s infinite;
 }
 
 #live-talk-btn.active::after {
   opacity: 1;
   animation: pulse 1.5s infinite;
+  background-color: rgba(0, 255, 200, 0.9);
+}
+
+/* Add a subtle shimmer animation to the premium button */
+@keyframes shimmer {
+  0% {
+    background-position: -300px 0;
+  }
+  100% {
+    background-position: 300px 0;
+  }
+}
+
+#live-talk-btn::before {
+  animation: pulse 2s infinite;
+}
+
+/* Add a subtle glow animation for the button */
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 15px rgba(0, 85, 255, 0.25),
+      inset 0 0 8px rgba(0, 170, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 120, 255, 0.4),
+      inset 0 0 12px rgba(0, 200, 255, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(0, 85, 255, 0.25),
+      inset 0 0 8px rgba(0, 170, 255, 0.2);
+  }
+}
+
+/* Add text pulse animation */
+@keyframes pulseText {
+  0% {
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.7));
+  }
+  50% {
+    filter: drop-shadow(0 1px 5px rgba(0, 200, 255, 0.9));
+  }
+  100% {
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.7));
+  }
+}
+
+#live-talk-btn {
+  animation: pulseGlow 3s infinite;
+}
+
+/* Add an elegant shine effect */
+#live-talk-btn:before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  animation: shine 6s infinite linear;
+  z-index: 0;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) rotate(30deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(30deg);
+  }
 }
 
 /* Microphone button active styles */

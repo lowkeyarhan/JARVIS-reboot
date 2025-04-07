@@ -1,11 +1,12 @@
 /* Container for the LiveTalk component */
 .live-talk-container {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1000;
+  z-index: 100;
+  pointer-events: none; /* Allow clicks to pass through to elements beneath */
 }
 
 /* Live Talk Modal Styles - Gemini Live Style */
@@ -20,7 +21,8 @@
   align-items: center;
   justify-content: center;
   z-index: 100;
-  animation: fadeIn 0.3s ease-in-out;
+  animation: modalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto; /* Re-enable pointer events for the modal itself */
 }
 
 .live-talk-modal {
@@ -30,6 +32,7 @@
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  animation: modalContentSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Header with Live indicator */
@@ -42,6 +45,7 @@
   z-index: 10;
   display: flex;
   justify-content: center;
+  animation: slideDownFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .live-indicator {
@@ -53,11 +57,13 @@
   padding: 8px 16px;
   border-radius: 30px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  animation: pulseIndicator 3s infinite;
 }
 
 .live-indicator i {
   color: #fff;
   font-size: 14px;
+  animation: pulseMic 2s infinite;
 }
 
 .live-indicator span {
@@ -75,6 +81,7 @@
   align-items: center;
   padding: 20px;
   z-index: 5;
+  animation: fadeIn 0.7s ease-out 0.3s both;
 }
 
 .live-transcript {
@@ -85,7 +92,8 @@
   padding: 16px 24px;
   margin-bottom: 40px;
   text-align: center;
-  animation: fadeIn 0.3s ease-out;
+  animation: transcriptAppear 0.5s ease-out;
+  transform-origin: center;
 }
 
 .live-transcript p {
@@ -104,6 +112,7 @@
   height: 300px;
   background: linear-gradient(to top, rgba(0, 122, 255, 0.3), transparent);
   z-index: 1;
+  animation: gradientAppear 1s ease-in-out;
 }
 
 /* Controls */
@@ -116,6 +125,7 @@
   justify-content: center;
   z-index: 10;
   padding: 0 20px;
+  animation: slideUpFade 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
 }
 
 .pause-button {
@@ -130,11 +140,49 @@
   margin-right: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease, background-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pause-button:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 255, 255, 0.2);
+  background-color: #f8f8f8;
+}
+
+.pause-button:active {
+  transform: scale(0.95);
+}
+
+.pause-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.pause-button:hover::after {
+  opacity: 1;
 }
 
 .pause-button i {
   font-size: 24px;
   color: #202124;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pause-button:hover i {
+  transform: scale(1.15);
 }
 
 .close-button {
@@ -148,11 +196,50 @@
   justify-content: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease, background-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.close-button:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 59, 48, 0.4);
+  background-color: #ff2d20;
+}
+
+.close-button:active {
+  transform: scale(0.95);
+}
+
+.close-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.close-button:hover::after {
+  opacity: 1;
 }
 
 .close-button i {
   font-size: 24px;
   color: white;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.close-button:hover i {
+  transform: rotate(90deg) scale(1.15);
 }
 
 /* Animations */
@@ -171,5 +258,99 @@
   }
   to {
     opacity: 0;
+  }
+}
+
+/* New animations for modal appearance */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+}
+
+@keyframes modalContentSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes transcriptAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes gradientAppear {
+  from {
+    opacity: 0;
+    height: 0;
+  }
+  to {
+    opacity: 1;
+    height: 300px;
+  }
+}
+
+@keyframes pulseIndicator {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 122, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 122, 255, 0);
+  }
+}
+
+@keyframes pulseMic {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
   }
 }

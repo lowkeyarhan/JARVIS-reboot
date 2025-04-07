@@ -535,8 +535,29 @@ const LiveTalk = ({
 
   // Close the modal
   const handleClose = () => {
+    // Stop listening first
     stopListening();
-    cancelSpeech();
+
+    // Force immediate cancellation of all speech with higher priority
+    try {
+      // Cancel ResponsiveVoice with higher priority
+      if (window.responsiveVoice) {
+        window.responsiveVoice.cancel();
+        // Force another cancellation to be sure
+        setTimeout(() => window.responsiveVoice.cancel(), 10);
+      }
+
+      // Cancel native speech synthesis with higher priority
+      if (synthRef.current) {
+        synthRef.current.cancel();
+        // Force another cancellation to be sure
+        setTimeout(() => synthRef.current.cancel(), 10);
+      }
+    } catch (e) {
+      console.error("Error stopping speech during close:", e);
+    }
+
+    // Only after cleanup, set the modal to inactive
     setIsActive(false);
   };
 
