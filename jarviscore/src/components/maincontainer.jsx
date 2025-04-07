@@ -210,18 +210,6 @@ function MainContainer() {
     <div className="main-container">
       <MainHeader />
 
-      <div className="hud-overlay">
-        <div className="hud-element hud-top-left">
-          <div className="hud-status">
-            <span className="hud-status-dot"></span>
-            <span>J.A.R.V.I.S. ONLINE</span>
-          </div>
-        </div>
-        <div className="hud-element hud-top-right">
-          <div className="hud-time">{formatTimestamp(currentTime)}</div>
-        </div>
-      </div>
-
       <div className="chat-container" ref={chatContainerRef}>
         {activeMessages.map((message, index) => {
           // Skip the first message (system message)

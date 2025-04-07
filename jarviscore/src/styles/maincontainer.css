@@ -18,7 +18,7 @@
 /* Header styles */
 .main-header {
   padding: 20px 30px;
-  border-bottom: 1px solid rgba(0, 85, 255, 0.25);
+  border-bottom: 1px solid rgba(10, 132, 255, 0.15);
   background: linear-gradient(
     180deg,
     rgba(10, 14, 23, 0.95) 0%,
@@ -546,75 +546,6 @@
 }
 
 /* HUD overlay styles */
-.hud-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 5;
-}
-
-.hud-element {
-  position: absolute;
-  color: rgba(0, 170, 255, 0.8);
-  font-family: "Roboto Mono", monospace;
-  font-size: 0.8rem;
-  text-shadow: 0 0 10px rgba(0, 170, 255, 0.4);
-  z-index: 10;
-}
-
-.hud-top-left {
-  top: 80px;
-  left: 20px;
-}
-
-.hud-top-right {
-  top: 80px;
-  right: 20px;
-}
-
-.hud-status {
-  display: flex;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.4);
-  padding: 5px 10px;
-  border-radius: 2px;
-  border: 1px solid rgba(0, 170, 255, 0.3);
-  position: relative;
-}
-
-.hud-status::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 30px;
-  height: 1px;
-  background: rgba(0, 170, 255, 0.8);
-}
-
-.hud-status::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 10px;
-  height: 10px;
-  border-right: 1px solid rgba(0, 170, 255, 0.8);
-  border-top: 1px solid rgba(0, 170, 255, 0.8);
-}
-
-.hud-status-dot {
-  width: 8px;
-  height: 8px;
-  background-color: rgba(0, 170, 255, 0.8);
-  border-radius: 50%;
-  margin-right: 8px;
-  position: relative;
-  animation: pulse 2s infinite;
-}
 
 @keyframes pulse {
   0% {
@@ -675,26 +606,25 @@
 }
 
 .assistant-message .message-header {
-  background-color: rgba(0, 85, 255, 0.1);
+  background-color: rgba(10, 132, 255, 0.1);
   border-bottom: 1px solid rgba(0, 85, 255, 0.2);
 }
 
 .user-message .message-header {
-  background-color: rgba(0, 85, 255, 0.2);
+  background-color: rgba(10, 132, 255, 0.07);
   border-bottom: 1px solid rgba(0, 85, 255, 0.3);
 }
 
 .message-sender {
-  font-weight: bold;
   letter-spacing: 1px;
 }
 
 .assistant-message .message-sender {
-  color: rgba(0, 170, 255, 0.9);
+  color: rgba(0, 85, 255, 0.732);
 }
 
 .user-message .message-sender {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.598);
 }
 
 .message-timestamp {
