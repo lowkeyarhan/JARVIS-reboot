@@ -1056,19 +1056,19 @@ function MainContainer() {
             </div>
           </div>
         )}
-
-        {/* LiveTalk Component positioned as a direct child of chat-container */}
-        {isLiveTalkActive && (
-          <div className="live-talk-container">
-            <LiveTalk
-              isActive={isLiveTalkActive}
-              setIsActive={setIsLiveTalkActive}
-              onSendMessage={handleLiveTalkMessage}
-              onReceiveResponse={handleLiveTalkResponse}
-            />
-          </div>
-        )}
       </div>
+
+      {/* LiveTalk Component positioned at the main container level instead of chat-container */}
+      {isLiveTalkActive && (
+        <div className="live-talk-container">
+          <LiveTalk
+            isActive={isLiveTalkActive}
+            setIsActive={setIsLiveTalkActive}
+            onSendMessage={handleLiveTalkMessage}
+            onReceiveResponse={handleLiveTalkResponse}
+          />
+        </div>
+      )}
 
       {/* Voice to Text Component */}
       <VoiceToText

@@ -12,7 +12,7 @@ const LiveTalk = ({
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
   const errorCountRef = useRef(0);
-  const [isResponsiveVoiceReady, setIsResponsiveVoiceReady] = useState(false);
+  const wakewordDetectorRef = useRef(null);
 
   // Initialize speech recognition
   const initializeSpeechRecognition = () => {
@@ -101,39 +101,117 @@ const LiveTalk = ({
     }
 
     synthRef.current = window.speechSynthesis;
+
+    // Force load voices
+    const loadVoices = () => {
+      const voices = synthRef.current.getVoices();
+      console.log(
+        "Available voices:",
+        voices.map((v) => `${v.name} (${v.lang})`)
+      );
+    };
+
+    loadVoices();
+
+    // Chrome requires an event listener for voices to be loaded
+    if (synthRef.current) {
+      synthRef.current.onvoiceschanged = loadVoices;
+    }
+
     return true;
   };
 
-  // Initialize ResponsiveVoice
-  const initializeResponsiveVoice = () => {
-    // Check if already loaded
-    if (window.responsiveVoice) {
-      setIsResponsiveVoiceReady(true);
-      return;
-    }
+  // Initialize wake-word detection if available
+  const initializeWakeWord = () => {
+    // Web Speech API based wake word detection
+    console.log("Using browser speech recognition for wake word detection");
 
-    // Load ResponsiveVoice script dynamically
-    const script = document.createElement("script");
-    script.src =
-      "https://code.responsivevoice.org/responsivevoice.js?key=cGTCJPOj";
-    script.async = true;
-    script.onload = () => {
-      if (window.responsiveVoice) {
-        window.responsiveVoice.init();
-        console.log(
-          "ResponsiveVoice loaded with voices:",
-          window.responsiveVoice.getVoices()
-        );
-        setIsResponsiveVoiceReady(true);
+    try {
+      // Create a simple wake word detector using the Web Speech API
+      const createWakeWordDetector = () => {
+        if (
+          !("webkitSpeechRecognition" in window) &&
+          !("SpeechRecognition" in window)
+        ) {
+          return false;
+        }
+
+        const WakeWordRecognition =
+          window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        const wakeWordRecognition = new WakeWordRecognition();
+        wakeWordRecognition.continuous = false;
+        wakeWordRecognition.interimResults = false;
+        wakeWordRecognition.maxAlternatives = 5;
+        wakeWordRecognition.lang = "en-US";
+
+        wakeWordRecognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript.toLowerCase();
+          console.log("Wake word check:", transcript);
+
+          // Check for wake words - "jarvis", "hey jarvis", etc.
+          if (
+            transcript.includes("jarvis") ||
+            transcript.includes("hey jarvis") ||
+            transcript.includes("okay jarvis")
+          ) {
+            console.log("Wake word detected:", transcript);
+            if (!isActive) {
+              setIsActive(true);
+            }
+          }
+
+          // Restart listening for wake word
+          setTimeout(() => {
+            if (!isActive) startWakeWordDetection();
+          }, 1000);
+        };
+
+        wakeWordRecognition.onend = () => {
+          // Restart if we're not in active mode
+          if (!isActive) {
+            setTimeout(() => {
+              startWakeWordDetection();
+            }, 1000);
+          }
+        };
+
+        wakeWordRecognition.onerror = (event) => {
+          console.error("Wake word detection error:", event.error);
+          setTimeout(() => {
+            if (!isActive) startWakeWordDetection();
+          }, 2000);
+        };
+
+        return wakeWordRecognition;
+      };
+
+      // Function to start wake word detection
+      const startWakeWordDetection = () => {
+        if (!wakewordDetectorRef.current) {
+          wakewordDetectorRef.current = createWakeWordDetector();
+        }
+
+        if (wakewordDetectorRef.current && !isActive) {
+          try {
+            wakewordDetectorRef.current.start();
+            console.log("Wake word detection started");
+          } catch (e) {
+            console.error("Error starting wake word detection:", e);
+          }
+        }
+      };
+
+      // Start wake word detection if not in active mode
+      if (!isActive) {
+        startWakeWordDetection();
       }
-    };
-    document.body.appendChild(script);
 
-    // Add fallback in case the script fails to load
-    script.onerror = () => {
-      console.error("Failed to load ResponsiveVoice, using native speech");
-      setIsResponsiveVoiceReady(false);
-    };
+      return true;
+    } catch (error) {
+      console.error("Error initializing wake word detection:", error);
+      return false;
+    }
   };
 
   // Handle sending message to API
@@ -182,26 +260,23 @@ const LiveTalk = ({
       .replace(/\{[^}]*\}/g, "")
       .replace(/\[[^\]]*\]/g, "");
 
-    // For some responses, add pauses and emphasis in key places
-    if (processedText.length > 20) {
-      // Add subtle emphasis to key phrases
-      processedText = processedText
-        .replace(
-          /(I believe|In my opinion|As you requested|If you prefer)/g,
-          ", $1,"
-        )
-        .replace(
-          /(however|moreover|furthermore|in addition|alternatively)/gi,
-          ", $1,"
-        );
-    }
+    // Add pauses using commas for natural speech in Web Speech API
+    processedText = processedText
+      .replace(
+        /(I believe|In my opinion|As you requested|If you prefer)/g,
+        ", $1,"
+      )
+      .replace(
+        /(however|moreover|furthermore|in addition|alternatively)/gi,
+        ", $1,"
+      );
 
     return processedText;
   };
 
-  // Text-to-speech function using ResponsiveVoice when available, fallback to native TTS
+  // Text-to-speech function using Web Speech API
   const speakText = (text) => {
-    // Ensure we don't have any ongoing speech
+    // Force cancel any existing speech
     cancelSpeech();
 
     // Wait a bit before starting new speech (helps prevent cutoffs)
@@ -209,105 +284,17 @@ const LiveTalk = ({
       // Process the text for more natural speech
       const processedText = processTextForSpeech(text);
 
-      // Try to use ResponsiveVoice (preferred)
-      if (
-        isResponsiveVoiceReady &&
-        window.responsiveVoice &&
-        window.responsiveVoice.voiceSupport()
-      ) {
-        console.log("Using ResponsiveVoice for speech");
-
-        // JARVIS from Iron Man style voice parameters
-        const jarvisVoiceParams = {
-          pitch: 1.0, // Natural pitch
-          rate: 0.85, // Slower pace for clarity and sophistication
-          volume: 0.9, // Slightly soft but clear
-
-          // Timbre/tone adjustments
-          equalizer: {
-            1: -2, // Reduce lowest frequencies for clarity
-            2: 0, // Keep low-mids natural
-            3: 1, // Slight boost to mid-range for warmth
-            4: -1, // Slight reduction in high-mids
-            5: -3, // Reduce highest frequencies for softness
-          },
-
-          // Premium voice enhancements
-          variant: "male",
-
-          // Events
-          onstart: () => console.log("JARVIS voice started speaking"),
-          onend: () => {
-            console.log("JARVIS voice finished speaking");
-            // Wait a bit before resuming listening to avoid self-triggering
-            setTimeout(() => {
-              // Resume listening after speaking
-              if (isActive && !isListening) {
-                startListening();
-              }
-            }, 300);
-          },
-          onerror: (error) => console.error("ResponsiveVoice error:", error),
-        };
-
-        // JARVIS-like voice options in order of preference
-        const jarvisVoiceOptions = [
-          "UK English Male", // Most widely available
-          "British Male",
-          "Daniel", // Premium British voices
-          "George", // Cultured British accent
-          "James", // Refined British accent
-          "Microsoft George - English (United Kingdom)",
-          "Microsoft Hazel - English (United Kingdom)",
-        ];
-
-        // Find the best available voice
-        let jarvisVoice = "UK English Male"; // default
-        for (const voice of jarvisVoiceOptions) {
-          if (
-            window.responsiveVoice.getVoices().some((v) => v.name === voice)
-          ) {
-            jarvisVoice = voice;
-            console.log(`Selected JARVIS voice: ${jarvisVoice}`);
-            break;
-          }
-        }
-
-        // Create speech parameters based on text length
-        const speechParams = { ...jarvisVoiceParams };
-
-        // For longer responses, speak in a single continuous stream
-        if (processedText.length > 100) {
-          speechParams.rate = 0.88; // Slightly faster for longer content
-        }
-
-        // Speak with the selected voice
-        try {
-          window.responsiveVoice.speak(
-            processedText,
-            jarvisVoice,
-            speechParams
-          );
-        } catch (error) {
-          console.error("ResponsiveVoice speak error:", error);
-          // Fallback to native speech if ResponsiveVoice fails
-          useFallbackSpeech(processedText);
-        }
-        return;
-      }
-
-      // Fallback to native Web Speech API
-      console.log("Fallback to native speech synthesis");
-      useFallbackSpeech(processedText);
+      // Use Web Speech API for speech
+      useSpeechSynthesis(processedText);
     }, 100); // Short delay before starting speech
   };
 
-  // Fallback to native Web Speech API with better handling
-  const useFallbackSpeech = (text) => {
+  // Use Web Speech API with British voice settings
+  const useSpeechSynthesis = (text) => {
     if (!synthRef.current) return;
 
     try {
-      // Cancel any existing speech first
+      // Make sure any existing speech is canceled
       synthRef.current.cancel();
 
       // Create utterance for the entire text
@@ -316,20 +303,24 @@ const LiveTalk = ({
       // Get all available voices
       const voices = synthRef.current.getVoices();
 
-      // JARVIS-like British voice options in priority order
-      const jarvisVoiceOptions = [
-        "Daniel (Enhanced)",
+      console.log(
+        "Finding voice from available options:",
+        voices.map((v) => `${v.name} (${v.lang})`).join(", ")
+      );
+
+      // British voice options in priority order
+      const britishVoiceOptions = [
         "Daniel",
-        "Microsoft George - English (United Kingdom)",
         "Google UK English Male",
+        "Microsoft George - English (United Kingdom)",
         "UK English Male",
         "British Male",
-        "English United Kingdom", // Safari often has this one
+        "English United Kingdom",
       ];
 
-      // Find the most JARVIS-like voice available
+      // Find the best British voice available
       let selectedVoice = null;
-      for (const voiceName of jarvisVoiceOptions) {
+      for (const voiceName of britishVoiceOptions) {
         const foundVoice = voices.find(
           (v) =>
             v.name.includes(voiceName) ||
@@ -338,6 +329,7 @@ const LiveTalk = ({
         );
         if (foundVoice) {
           selectedVoice = foundVoice;
+          console.log(`Found matching voice: ${foundVoice.name}`);
           break;
         }
       }
@@ -353,32 +345,55 @@ const LiveTalk = ({
             (voice.lang === "en-GB" &&
               !voice.name.toLowerCase().includes("female"))
         );
+
+        if (selectedVoice) {
+          console.log(`Found broader match voice: ${selectedVoice.name}`);
+        }
       }
 
       // Final fallback to any English voice
       if (!selectedVoice) {
         selectedVoice = voices.find((voice) => voice.lang.includes("en"));
+        if (selectedVoice) {
+          console.log(`Using fallback English voice: ${selectedVoice.name}`);
+        } else {
+          // Ultimate fallback - use the first available voice
+          selectedVoice = voices[0];
+          console.log(
+            `Using first available voice: ${
+              selectedVoice?.name || "None available"
+            }`
+          );
+        }
       }
 
       // Set the voice if found
       if (selectedVoice) {
-        console.log("Using JARVIS-like native voice:", selectedVoice.name);
+        console.log("Selected British voice:", selectedVoice.name);
         utterance.voice = selectedVoice;
+      } else {
+        console.warn("No suitable voice found, using browser default");
       }
 
-      // Configure for a JARVIS-like voice
+      // Configure for a calm assistant voice as requested
       utterance.lang = "en-GB";
-      utterance.rate = 0.88; // Slower for clarity and gravitas
-      utterance.pitch = 0.95; // Slightly lower for authority
-      utterance.volume = 0.95; // Clear but not too loud
+      utterance.rate = 0.85; // Slower for calm, natural pacing
+      utterance.pitch = 0.9; // Slightly lower for calm authority
+      utterance.volume = 1.0; // Full volume for clarity
 
-      // Use a single utterance for the entire text to avoid interruptions
+      console.log("Speech settings:", {
+        voice: utterance.voice?.name || "default",
+        rate: utterance.rate,
+        pitch: utterance.pitch,
+      });
+
+      // Event handlers
       utterance.onstart = () => {
-        console.log("JARVIS native speech started");
+        console.log("Speech started with Web Speech API");
       };
 
       utterance.onend = () => {
-        console.log("JARVIS native speech ended");
+        console.log("Speech ended with Web Speech API");
         // Wait a bit before resuming listening
         setTimeout(() => {
           if (isActive && !isListening) {
@@ -388,17 +403,17 @@ const LiveTalk = ({
       };
 
       utterance.onerror = (event) => {
-        console.error("JARVIS speech synthesis error:", event);
+        console.error("Speech synthesis error:", event);
         // Try to recover if possible
         if (isActive && !isListening) {
           startListening();
         }
       };
 
-      // Speak the text in one go to prevent interruptions
+      // Speak the text
       synthRef.current.speak(utterance);
     } catch (error) {
-      console.error("Native speech error:", error);
+      console.error("Speech synthesis error:", error);
       // Ensure we recover from errors
       if (isActive && !isListening) {
         startListening();
@@ -409,23 +424,14 @@ const LiveTalk = ({
   // Cancel any ongoing speech
   const cancelSpeech = () => {
     try {
-      // Ensure we stop any ResponsiveVoice speech
-      if (window.responsiveVoice && window.responsiveVoice.isPlaying()) {
-        console.log("Canceling ResponsiveVoice speech");
-        window.responsiveVoice.cancel();
-      }
-
-      // Also stop any Web Speech API speech
-      if (synthRef.current && synthRef.current.speaking) {
-        console.log("Canceling native speech");
+      // Stop Web Speech API speech
+      if (synthRef.current) {
+        console.log("Canceling speech");
         synthRef.current.cancel();
       }
 
       // Double-check cancelation worked
       setTimeout(() => {
-        if (window.responsiveVoice && window.responsiveVoice.isPlaying()) {
-          window.responsiveVoice.cancel();
-        }
         if (synthRef.current && synthRef.current.speaking) {
           synthRef.current.cancel();
         }
@@ -480,26 +486,9 @@ const LiveTalk = ({
   useEffect(() => {
     initializeSpeechRecognition();
     initializeSpeechSynthesis();
-    initializeResponsiveVoice();
 
-    // Initialize voices with detailed logging
-    const initVoices = () => {
-      if (synthRef.current) {
-        const voices = synthRef.current.getVoices();
-        console.log(
-          "Available native voices:",
-          voices.map((v) => `${v.name} (${v.lang})`)
-        );
-      }
-    };
-
-    // Initialize voices
-    initVoices();
-
-    // Chrome requires an event listener for voices to be loaded
-    if (synthRef.current) {
-      synthRef.current.onvoiceschanged = initVoices;
-    }
+    // Initialize wake word detection with fallback approach
+    initializeWakeWord();
 
     // Start listening when component mounts
     if (isActive) {
@@ -538,16 +527,9 @@ const LiveTalk = ({
     // Stop listening first
     stopListening();
 
-    // Force immediate cancellation of all speech with higher priority
+    // Force immediate cancellation of all speech
     try {
-      // Cancel ResponsiveVoice with higher priority
-      if (window.responsiveVoice) {
-        window.responsiveVoice.cancel();
-        // Force another cancellation to be sure
-        setTimeout(() => window.responsiveVoice.cancel(), 10);
-      }
-
-      // Cancel native speech synthesis with higher priority
+      // Cancel speech synthesis with higher priority
       if (synthRef.current) {
         synthRef.current.cancel();
         // Force another cancellation to be sure

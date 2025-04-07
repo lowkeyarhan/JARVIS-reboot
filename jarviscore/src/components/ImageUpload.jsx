@@ -7,6 +7,17 @@ const ImageUpload = ({ onImageUpload, isActive, setIsActive }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const fileInputRef = useRef(null);
 
+  // Open file picker when component becomes active
+  useEffect(() => {
+    if (isActive && fileInputRef.current) {
+      fileInputRef.current.click();
+      // Deactivate after opening file picker to prevent multiple triggers
+      setTimeout(() => {
+        setIsActive(false);
+      }, 100);
+    }
+  }, [isActive, setIsActive]);
+
   // Handle file selection
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
