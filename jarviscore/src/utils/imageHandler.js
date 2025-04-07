@@ -80,47 +80,6 @@ export function enhanceImages() {
       img.addEventListener("click", () => {
         createLightbox(img.src, img.alt);
       });
-
-      // // Add zoom icon indicator
-      // const zoomIcon = document.createElement("div");
-      // zoomIcon.className = "zoom-icon";
-      // zoomIcon.innerHTML = `
-      //   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      //     <path d="M15 3H21V9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      //     <path d="M9 21H3V15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      //     <path d="M21 3L14 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      //     <path d="M3 21L10 14" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      //   </svg>
-      // `;
-
-      // // Style the zoom icon
-      // zoomIcon.style.position = "absolute";
-      // zoomIcon.style.top = "10px";
-      // zoomIcon.style.right = "10px";
-      // zoomIcon.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-      // zoomIcon.style.borderRadius = "50%";
-      // zoomIcon.style.width = "32px";
-      // zoomIcon.style.height = "32px";
-      // zoomIcon.style.display = "flex";
-      // zoomIcon.style.alignItems = "center";
-      // zoomIcon.style.justifyContent = "center";
-      // zoomIcon.style.opacity = "0";
-      // zoomIcon.style.transition = "opacity 0.3s ease";
-
-      // container.appendChild(zoomIcon);
-
-      // // Show zoom icon on hover
-      // container.addEventListener("mouseenter", () => {
-      //   // zoomIcon.style.opacity = "1";
-      //   // img.style.transform = "scale(1.02)";
-      //   // container.style.boxShadow = "0 6px 16px rgba(0, 0, 0, 0.15)";
-      // });
-
-      // container.addEventListener("mouseleave", () => {
-      //   zoomIcon.style.opacity = "0";
-      //   img.style.transform = "scale(1)";
-      //   container.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.1)";
-      // });
     });
 }
 
@@ -154,48 +113,6 @@ export function createLightbox(src, alt) {
     lightbox.style.transition = "opacity 0.3s ease";
 
     document.body.appendChild(lightbox);
-
-    // Add close button
-    const closeBtn = document.createElement("button");
-    closeBtn.className = "lightbox-close";
-    closeBtn.innerHTML = "×";
-
-    // Style close button
-    closeBtn.style.position = "absolute";
-    closeBtn.style.top = "20px";
-    closeBtn.style.right = "20px";
-    closeBtn.style.background = "none";
-    closeBtn.style.border = "none";
-    closeBtn.style.color = "white";
-    closeBtn.style.fontSize = "36px";
-    closeBtn.style.cursor = "pointer";
-    closeBtn.style.zIndex = "10000";
-    closeBtn.style.width = "44px";
-    closeBtn.style.height = "44px";
-    closeBtn.style.display = "flex";
-    closeBtn.style.alignItems = "center";
-    closeBtn.style.justifyContent = "center";
-    closeBtn.style.borderRadius = "50%";
-    closeBtn.style.transition = "background-color 0.2s ease";
-
-    closeBtn.addEventListener("mouseenter", () => {
-      closeBtn.style.backgroundColor = "rgba(255, 255, 255, 0.2)";
-    });
-
-    closeBtn.addEventListener("mouseleave", () => {
-      closeBtn.style.backgroundColor = "transparent";
-    });
-
-    closeBtn.addEventListener("click", () => {
-      lightbox.style.opacity = "0";
-      setTimeout(() => {
-        if (document.body.contains(lightbox)) {
-          document.body.removeChild(lightbox);
-        }
-      }, 300);
-    });
-
-    lightbox.appendChild(closeBtn);
 
     // Close lightbox on background click
     lightbox.addEventListener("click", (e) => {

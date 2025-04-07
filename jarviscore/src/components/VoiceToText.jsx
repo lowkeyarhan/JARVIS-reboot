@@ -138,6 +138,24 @@ const VoiceToText = ({ onTranscript, isActive, setIsActive }) => {
     };
   }, []);
 
+  // Handle Enter key press to stop voice recognition
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === "Enter" && isActive) {
+        e.preventDefault();
+        setIsActive(false);
+      }
+    };
+
+    if (isActive) {
+      document.addEventListener("keydown", handleKeyPress);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [isActive, setIsActive]);
+
   // Reset error count when activating/deactivating
   useEffect(() => {
     if (isActive) {
@@ -199,6 +217,12 @@ const VoiceToText = ({ onTranscript, isActive, setIsActive }) => {
             <div className="wave wave1"></div>
             <div className="wave wave2"></div>
             <div className="wave wave3"></div>
+            <div className="wave wave4"></div>
+            <div className="wave wave5"></div>
+            <div className="wave wave6"></div>
+            <div className="wave wave7"></div>
+            <div className="wave wave8"></div>
+            <div className="wave wave9"></div>
           </div>
           <div className="voice-status">Listening...</div>
         </>
