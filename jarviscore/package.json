@@ -10,10 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "abort-controller": "^3.0.0",
     "dompurify": "^3.2.5",
     "highlight.js": "^11.11.1",
     "katex": "^0.16.21",
     "marked": "^15.0.7",
+    "pdfjs-dist": "^5.1.91",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.5.0"

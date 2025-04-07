@@ -2,6 +2,28 @@
 const apiKey = "AIzaSyAR2Y-3i75WrJCzhPZ7IIsylrewzBKJCYY";
 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
+// Import PDF.js for PDF text extraction
+import * as pdfjs from "pdfjs-dist";
+
+// Initialize PDF.js worker - only do this once
+let isWorkerInitialized = false;
+const initPdfWorker = () => {
+  if (
+    !isWorkerInitialized &&
+    typeof window !== "undefined" &&
+    "Worker" in window
+  ) {
+    try {
+      pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+      isWorkerInitialized = true;
+      console.log("PDF.js worker initialized successfully");
+    } catch (error) {
+      console.error("Failed to initialize PDF.js worker:", error);
+    }
+  }
+  return isWorkerInitialized;
+};
+
 // System instruction for J.A.R.V.I.S personality
 const systemInstruction = {
   role: "system",
@@ -71,9 +93,316 @@ const generationConfig = {
 };
 
 /**
+ * Determines if a PDF file is too large for processing
+ * @param {number} fileSize - Size of the PDF file in bytes
+ * @returns {boolean} - Whether the file is too large
+ */
+const isPdfTooLarge = (fileSize) => {
+  const MAX_SAFE_PDF_SIZE = 5 * 1024 * 1024; // 5MB
+  return fileSize > MAX_SAFE_PDF_SIZE;
+};
+
+/**
+ * Extract text from a PDF file with enhanced error handling and optimization
+ * @param {ArrayBuffer} arrayBuffer - PDF file as array buffer
+ * @param {string} fileName - Name of the PDF file
+ * @param {number} fileSize - Size of the PDF file in bytes
+ * @returns {Promise<string>} - Extracted text from PDF
+ */
+const extractPdfText = async (arrayBuffer, fileName, fileSize) => {
+  // First check if the file is too large
+  if (isPdfTooLarge(fileSize)) {
+    return `[PDF file "${fileName}" (${(fileSize / (1024 * 1024)).toFixed(
+      2
+    )} MB) is too large for direct processing]\n\nTo avoid excessive loading times, I've skipped text extraction. Please consider:\n1. Sharing specific pages or sections you'd like me to review\n2. Using an external PDF text extractor and sharing the text\n3. Summarizing the key points yourself, and I'll assist based on your summary`;
+  }
+
+  // Initialize PDF.js worker if not already done
+  if (!initPdfWorker()) {
+    return `[PDF processing error: Unable to initialize PDF.js worker]\n\nPlease refresh the page and try again, or extract the text manually.`;
+  }
+
+  try {
+    // Create an abort controller for all timeout handling
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    // Main extraction promise
+    const extractionPromise = new Promise(async (resolve, reject) => {
+      try {
+        // Safety timeout for the entire operation
+        const mainTimeout = setTimeout(() => {
+          controller.abort();
+          reject(new Error("PDF processing timed out after 30 seconds"));
+        }, 30000); // 30 seconds total max time (increased from 15s)
+
+        signal.addEventListener("abort", () => {
+          reject(new Error("PDF operation was aborted"));
+        });
+
+        // Load the PDF document with safety timeout
+        const loadingTask = pdfjs.getDocument({
+          data: arrayBuffer,
+          isEvalSupported: false, // Disable eval for security
+          nativeImageDecoderSupport: "none", // Don't decode images to save memory
+          ignoreErrors: true, // Try to recover from errors
+          password: "", // Try without password first
+        });
+
+        // Handle loading document cancellation
+        signal.addEventListener("abort", () => {
+          loadingTask.destroy();
+        });
+
+        // Set document loading timeout
+        const loadingTimeout = setTimeout(() => {
+          if (!signal.aborted) {
+            controller.abort();
+            reject(new Error("PDF document loading timed out after 8 seconds"));
+          }
+        }, 8000); // 8 second timeout for initial loading (increased from 5s)
+
+        let pdf;
+        try {
+          pdf = await loadingTask.promise;
+          clearTimeout(loadingTimeout);
+        } catch (loadError) {
+          clearTimeout(loadingTimeout);
+
+          // Try again with password if it might be encrypted
+          if (loadError.message.includes("password")) {
+            try {
+              reject(new Error("This PDF appears to be password-protected"));
+              return;
+            } catch (pwdError) {
+              reject(new Error(`Failed to load PDF: ${pwdError.message}`));
+              return;
+            }
+          } else {
+            reject(loadError);
+            return;
+          }
+        }
+
+        // Determine optimal number of pages to process based on total pages
+        const totalPages = pdf.numPages;
+        let pagesToProcess;
+
+        if (totalPages <= 3) {
+          pagesToProcess = totalPages; // Process all pages for small documents
+        } else if (totalPages <= 10) {
+          pagesToProcess = 5; // First 5 pages for medium docs
+        } else if (totalPages <= 50) {
+          pagesToProcess = 3; // First 3 pages for larger docs
+        } else {
+          pagesToProcess = 2; // Just first 2 pages for very large docs
+        }
+
+        let extractedText = `PDF Document: "${fileName}" (${totalPages} pages`;
+        if (pagesToProcess < totalPages) {
+          extractedText += `, showing first ${pagesToProcess}`;
+        }
+        extractedText += `)\n\n`;
+
+        // Extract text with progressive timeouts
+        const extractPages = async () => {
+          // Use a more generous timeout for page processing based on document size
+          const pageTimeoutMs = Math.min(4000, 2000 + totalPages * 10);
+
+          for (let i = 1; i <= pagesToProcess; i++) {
+            if (signal.aborted) break;
+
+            try {
+              // Use a timeout for each page extraction
+              const pagePromise = new Promise(async (resolveP, rejectP) => {
+                const pageTimeout = setTimeout(() => {
+                  if (!signal.aborted) {
+                    rejectP(
+                      new Error(
+                        `Page ${i} extraction timed out after ${pageTimeoutMs}ms`
+                      )
+                    );
+                  }
+                }, pageTimeoutMs);
+
+                try {
+                  const page = await pdf.getPage(i);
+                  const textContent = await page.getTextContent({
+                    normalizeWhitespace: true,
+                    disableCombineTextItems: false,
+                  });
+
+                  // Process text in a more memory-efficient way
+                  let pageText = "";
+                  let lastY;
+                  let lastItem = null;
+
+                  for (const item of textContent.items) {
+                    // Add newlines when Y position changes significantly
+                    if (
+                      lastY !== undefined &&
+                      Math.abs(lastY - item.transform[5]) > 5
+                    ) {
+                      pageText += "\n";
+                    }
+
+                    // Add space between words if needed
+                    if (
+                      lastItem &&
+                      lastItem.str.length > 0 &&
+                      !lastItem.str.endsWith(" ") &&
+                      !lastItem.str.endsWith("-") &&
+                      !item.str.startsWith(" ")
+                    ) {
+                      pageText += " ";
+                    }
+
+                    pageText += item.str;
+                    lastY = item.transform[5];
+                    lastItem = item;
+                  }
+
+                  // Clean up the page text
+                  pageText = pageText
+                    .replace(/\s+/g, " ") // Normalize whitespace
+                    .replace(/\n\s+/g, "\n") // Remove leading spaces after newlines
+                    .replace(/\n{3,}/g, "\n\n"); // Limit consecutive newlines
+
+                  resolveP(`--- Page ${i} ---\n${pageText.trim()}\n\n`);
+                  clearTimeout(pageTimeout);
+
+                  // Explicitly clean up page resources
+                  page.cleanup();
+                } catch (err) {
+                  clearTimeout(pageTimeout);
+                  rejectP(err);
+                }
+              });
+
+              // Catch errors per page but continue processing other pages
+              try {
+                extractedText += await pagePromise;
+              } catch (pageError) {
+                console.warn(`Error extracting page ${i}:`, pageError);
+                extractedText += `--- Page ${i} ---\n[Content extraction failed for this page: ${pageError.message}]\n\n`;
+              }
+            } catch (e) {
+              extractedText += `--- Page ${i} ---\n[Content extraction failed for this page]\n\n`;
+            }
+          }
+
+          if (pagesToProcess < totalPages) {
+            extractedText += `[PDF preview only: showing ${pagesToProcess} of ${totalPages} total pages]\n\n`;
+            extractedText += `To analyze specific additional pages, please let me know which ones you'd like me to examine.`;
+          }
+
+          return extractedText;
+        };
+
+        try {
+          const result = await extractPages();
+          clearTimeout(mainTimeout);
+          resolve(result);
+        } catch (extractError) {
+          reject(extractError);
+        } finally {
+          // Ensure we clean up PDF resources
+          try {
+            pdf.destroy();
+          } catch (e) {
+            console.warn("Error destroying PDF object:", e);
+          }
+        }
+      } catch (err) {
+        reject(err);
+      }
+    });
+
+    // Execute with proper error handling
+    try {
+      return await extractionPromise;
+    } catch (error) {
+      console.error("PDF extraction error:", error);
+      return `[PDF processing error: ${
+        error.message || "The file may be encrypted, damaged, or too large"
+      }]\n\nPlease consider extracting the text manually or sharing specific parts you'd like me to review.`;
+    }
+  } catch (outerError) {
+    console.error("Fatal PDF processing error:", outerError);
+    return `[PDF processing failed completely: ${outerError.message}]\n\nThis could be due to browser limitations or memory constraints. Please extract the text manually or convert the PDF to a more accessible format.`;
+  }
+};
+
+/**
+ * Check if a file is a text-based file by its MIME type or extension
+ * @param {string} fileType - MIME type of the file
+ * @param {string} fileName - Name of the file
+ * @returns {boolean} - Whether the file is text-based
+ */
+const isTextBasedFile = (fileType, fileName) => {
+  // Known text MIME types
+  if (
+    fileType.includes("text/") ||
+    fileType.includes("application/json") ||
+    fileType.includes("application/xml") ||
+    fileType.includes("application/javascript") ||
+    fileType.includes("text/csv") ||
+    fileType.includes("application/csv")
+  ) {
+    return true;
+  }
+
+  // Check file extension for common text-based formats
+  if (fileName) {
+    const extension = fileName.split(".").pop().toLowerCase();
+    const textExtensions = [
+      "txt",
+      "json",
+      "xml",
+      "html",
+      "css",
+      "js",
+      "jsx",
+      "ts",
+      "tsx",
+      "md",
+      "csv",
+      "log",
+      "yml",
+      "yaml",
+      "toml",
+      "ini",
+      "conf",
+      "py",
+      "java",
+      "c",
+      "cpp",
+      "h",
+      "hpp",
+      "cs",
+      "php",
+      "rb",
+      "go",
+      "rs",
+      "swift",
+      "kt",
+      "sql",
+      "sh",
+      "bat",
+      "ps1",
+      "r",
+    ];
+
+    return textExtensions.includes(extension);
+  }
+
+  return false;
+};
+
+/**
  * Read a file and convert it to base64 text for Gemini API
  * @param {File} file - The file object to read
- * @returns {Promise<{type: string, data: string, content: string}>} - File info for API
+ * @returns {Promise<{type: string, data: string, content: string, format: string}>} - File info for API
  */
 const readFileContent = async (file) => {
   return new Promise((resolve, reject) => {
@@ -81,25 +410,110 @@ const readFileContent = async (file) => {
 
     reader.onload = async (event) => {
       try {
-        const fileType = file.type;
-        const isImage = fileType.startsWith("image/");
-        const isText =
-          fileType.includes("text/") ||
-          fileType.includes("application/json") ||
-          fileType.includes("application/xml") ||
-          fileType.includes("application/javascript");
+        const fileType = file.type || "application/octet-stream";
+        const fileName = file.name;
+        const extension = fileName.split(".").pop().toLowerCase();
+        const fileSize = file.size;
 
-        // For image files, convert to base64 with data URL
-        if (isImage) {
+        // Determine the file format for better handling
+        let format = "unknown";
+
+        // Image files
+        if (fileType.startsWith("image/")) {
+          format = "image";
           const base64Data = event.target.result.split(",")[1];
           resolve({
             type: fileType,
             data: base64Data,
             content: null,
+            format: format,
           });
         }
-        // For text files, extract actual text content
-        else if (isText) {
+        // PDF files
+        else if (fileType === "application/pdf" || extension === "pdf") {
+          format = "pdf";
+          try {
+            // Show a quick size warning for large PDFs
+            if (isPdfTooLarge(fileSize)) {
+              resolve({
+                type: fileType,
+                data: null, // Don't include the data for large PDFs
+                content: `[PDF file "${fileName}" (${(
+                  fileSize /
+                  (1024 * 1024)
+                ).toFixed(
+                  2
+                )} MB) is too large for direct processing]\n\nTo avoid excessive loading times, I've skipped text extraction. Please consider:\n1. Sharing specific pages or sections you'd like me to review\n2. Using an external PDF text extractor and sharing the text\n3. Summarizing the key points yourself, and I'll assist based on your summary`,
+                format: format,
+              });
+              return;
+            }
+
+            // Convert data URL to array buffer for PDF.js
+            const base64Data = event.target.result.split(",")[1];
+            const binaryString = atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            const arrayBuffer = bytes.buffer;
+
+            // Extract text from PDF with improved handling
+            const pdfText = await extractPdfText(
+              arrayBuffer,
+              fileName,
+              fileSize
+            );
+
+            resolve({
+              type: fileType,
+              data: null, // Don't include the data to reduce payload size
+              content: pdfText,
+              format: format,
+            });
+          } catch (pdfError) {
+            console.error("Error processing PDF:", pdfError);
+
+            // Fallback if text extraction fails
+            resolve({
+              type: fileType,
+              data: null,
+              content: `[PDF Document: "${fileName}", ${(
+                fileSize / 1024
+              ).toFixed(2)} KB - Unable to extract text: ${
+                pdfError.message
+              }]\n\nThe PDF couldn't be processed. It may be corrupted, password-protected, or using unsupported features.`,
+              format: format,
+            });
+          }
+        }
+        // CSV files
+        else if (fileType === "text/csv" || extension === "csv") {
+          format = "csv";
+          const textContent = event.target.result;
+          // For large CSV files, just show a preview
+          const maxRows = 50;
+          const rows = textContent.split("\n").slice(0, maxRows + 1);
+          const hasMoreRows = rows.length > maxRows;
+
+          const csvContent =
+            rows.slice(0, maxRows).join("\n") +
+            (hasMoreRows
+              ? "\n\n[CSV truncated, showing first 50 rows of " +
+                textContent.split("\n").length +
+                " total rows]"
+              : "");
+
+          resolve({
+            type: fileType,
+            data: null,
+            content: csvContent,
+            format: format,
+          });
+        }
+        // Code files (jsx, js, ts, etc.)
+        else if (isTextBasedFile(fileType, fileName)) {
+          format = "code";
           const textContent = event.target.result;
           // Maximum text length to prevent excessively large API calls
           const maxLength = 100000;
@@ -109,21 +523,55 @@ const readFileContent = async (file) => {
                 "\n\n[Content truncated due to size limits...]"
               : textContent;
 
+          // Identify language for code highlighting
+          let language = "plaintext";
+          if (extension) {
+            // Map file extensions to markdown language codes
+            const languageMap = {
+              js: "javascript",
+              jsx: "jsx",
+              ts: "typescript",
+              tsx: "tsx",
+              py: "python",
+              rb: "ruby",
+              java: "java",
+              c: "c",
+              cpp: "cpp",
+              cs: "csharp",
+              php: "php",
+              html: "html",
+              css: "css",
+              sql: "sql",
+              json: "json",
+              xml: "xml",
+              md: "markdown",
+              sh: "bash",
+              yml: "yaml",
+              yaml: "yaml",
+            };
+
+            language = languageMap[extension] || "plaintext";
+          }
+
           resolve({
             type: fileType,
             data: null,
             content: truncatedContent,
+            format: format,
+            language: language,
           });
         }
         // For other files (binary), convert to base64 with data URL
         else {
+          format = "binary";
           const base64Data = event.target.result.split(",")[1];
           resolve({
             type: fileType,
             data: base64Data,
-            content: `[Binary file: ${file.name}, type: ${fileType}, size: ${(
-              file.size / 1024
+            content: `[Binary file: ${fileName}, type: ${fileType}, size: ${(
+              fileSize / 1024
             ).toFixed(2)} KB]`,
+            format: format,
           });
         }
       } catch (error) {
@@ -135,7 +583,12 @@ const readFileContent = async (file) => {
       reject(new Error(`Failed to read file: ${file.name}`));
     };
 
-    if (file.type.startsWith("image/") || !file.type.includes("text/")) {
+    // Choose appropriate reading method based on file type
+    if (
+      file.type.startsWith("image/") ||
+      file.type === "application/pdf" ||
+      (!isTextBasedFile(file.type, file.name) && !file.type.includes("text/"))
+    ) {
       reader.readAsDataURL(file);
     } else {
       reader.readAsText(file);
@@ -177,9 +630,9 @@ export const generateGeminiResponse = async (messages) => {
           const filesDescription = msg.files
             .map(
               (file) =>
-                `File: ${file.name} (${file.type}, ${(file.size / 1024).toFixed(
-                  1
-                )} KB)`
+                `File: ${file.name} (${file.type || "unknown type"}, ${(
+                  file.size / 1024
+                ).toFixed(1)} KB)`
             )
             .join("\n");
 
@@ -198,7 +651,7 @@ export const generateGeminiResponse = async (messages) => {
                 const fileContent = await readFileContent(file.file);
 
                 // Add image files as inline data
-                if (file.type.startsWith("image/") && fileContent.data) {
+                if (fileContent.format === "image" && fileContent.data) {
                   parts.push({
                     inlineData: {
                       mimeType: file.type,
@@ -206,7 +659,26 @@ export const generateGeminiResponse = async (messages) => {
                     },
                   });
                 }
-                // Add text content
+                // Add PDF files with extracted content
+                else if (fileContent.format === "pdf") {
+                  parts.push({
+                    text: `PDF file "${file.name}":\n\n${fileContent.content}\n\n`,
+                  });
+                }
+                // Add CSV files with content properly formatted
+                else if (fileContent.format === "csv" && fileContent.content) {
+                  parts.push({
+                    text: `CSV file "${file.name}":\n\n\`\`\`csv\n${fileContent.content}\n\`\`\`\n\n`,
+                  });
+                }
+                // Add code files with proper syntax highlighting
+                else if (fileContent.format === "code" && fileContent.content) {
+                  const language = fileContent.language || "plaintext";
+                  parts.push({
+                    text: `Code file "${file.name}":\n\n\`\`\`${language}\n${fileContent.content}\n\`\`\`\n\n`,
+                  });
+                }
+                // Add text content for other files
                 else if (fileContent.content) {
                   parts.push({
                     text: `Content of file "${file.name}":\n\n${fileContent.content}\n\n`,
