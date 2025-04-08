@@ -933,7 +933,43 @@ function MainContainer() {
     return "fa-file";
   };
 
-  // Handle live talk message send
+  // Modified Live Talk API endpoint
+  const getLiveTalkEndpoint = () => {
+    return "/api/chat?mode=live";
+  };
+
+  // Direct API call handler for Live Talk without adding to chat
+  const handleLiveTalkDirectApi = async (message) => {
+    if (!message.trim() || !apiAvailable) return null;
+
+    try {
+      // Extract current conversation context for API
+      const context = activeMessages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+        ...(msg.image && { image: msg.image }),
+      }));
+
+      // Create messages array for the API call
+      const apiMessages = [...context, { role: "user", content: message }];
+
+      // Call Gemini API directly
+      const response = await generateGeminiResponse(apiMessages);
+
+      return {
+        role: "assistant",
+        content: response || "I couldn't process that request.",
+      };
+    } catch (error) {
+      console.error("Error in live talk API call:", error);
+      return {
+        role: "assistant",
+        content: "I'm sorry, there was an error processing your request.",
+      };
+    }
+  };
+
+  // Original Live Talk handler (keep for backward compatibility)
   const handleLiveTalkMessage = async (message) => {
     if (!message.trim() || !apiAvailable) return null;
 
@@ -1002,8 +1038,7 @@ function MainContainer() {
 
   // Function to handle receiving a live talk response
   const handleLiveTalkResponse = (response) => {
-    // Ensure the conversation is correctly updated in the UI
-    console.log("Live talk exchange complete", response);
+    // No longer needed as we're handling this in the LiveTalk component
   };
 
   // Render the component
@@ -1064,7 +1099,7 @@ function MainContainer() {
           <LiveTalk
             isActive={isLiveTalkActive}
             setIsActive={setIsLiveTalkActive}
-            onSendMessage={handleLiveTalkMessage}
+            onSendMessage={handleLiveTalkDirectApi}
             onReceiveResponse={handleLiveTalkResponse}
           />
         </div>
