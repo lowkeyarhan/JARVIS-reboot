@@ -225,22 +225,39 @@ const tokenizeText = (text) => {
  * @returns {string} - Processed text with proper formatting
  */
 export const processTextForSpeech = (text) => {
-  let processedText = text
-    .replace(/\s+/g, " ")
-    .replace(/\s+([.,;:!?])/g, "$1")
-    .replace(/([.,;:!?])(\w)/g, "$1 $2")
-    .trim();
+  if (!text) return "";
 
-  // Remove HTML tags and markdown
-  processedText = processedText
-    .replace(/<[^>]*>/g, "")
-    .replace(/\{[^}]*\}/g, "")
-    .replace(/\[[^\]]*\]/g, "");
+  // Simple text cleaning instead of complex SSML
+  let processed = text.trim();
 
-  // Split into sentences for better processing
-  const sentences = processedText.split(/(?<=[.!?])\s+/);
+  // Clean up any potential HTML/SSML tags already in the text
+  processed = processed.replace(/<[^>]*>/g, "");
 
-  return sentences.join(" ");
+  // Replace multiple spaces with single space
+  processed = processed.replace(/\s+/g, " ");
+
+  // Ensure proper spacing after punctuation
+  processed = processed.replace(/([.,;:!?])(\w)/g, "$1 $2");
+
+  // Fix common abbrevations
+  processed = processed.replace(/(\w)\.(\w)/g, "$1. $2"); // Fix abbrevs like "e.g." -> "e. g."
+
+  // Replace em dashes with commas for better pausing
+  processed = processed.replace(/—/g, ", ");
+
+  // Add periods to make sure sentences end properly
+  if (
+    !processed.endsWith(".") &&
+    !processed.endsWith("!") &&
+    !processed.endsWith("?")
+  ) {
+    processed += ".";
+  }
+
+  // Add space after numbered lists for better parsing
+  processed = processed.replace(/(\d+\.)(\w)/g, "$1 $2");
+
+  return processed;
 };
 
 /**
@@ -276,17 +293,18 @@ const synthesizeWithWebSpeech = (text) => {
         const utterance = new SpeechSynthesisUtterance(text);
 
         // Configure voice and options for a young British female voice
-        utterance.rate = 1.0; // Normal speed for more natural speech
-        utterance.pitch = 1.2; // Slightly higher pitch for female voice
+        utterance.rate = 0.9; // Slightly slower for more natural speech
+        utterance.pitch = 1.1; // Slightly higher pitch for clarity
         utterance.volume = 1.0; // Full volume
 
-        // Try to find a British female voice
+        // Try to find a British voice
         const preferredVoices = [
           "Google UK English Female",
-          "Samantha", // macOS British female
-          "Microsoft Zira", // Windows British female
-          "Karen", // macOS Australian female (fallback)
-          "Microsoft Hazel", // Windows British female
+          "Google UK English Male",
+          "Microsoft Zira",
+          "Samantha",
+          "Karen",
+          "Microsoft Hazel",
         ];
         let foundVoice = false;
 
@@ -302,32 +320,23 @@ const synthesizeWithWebSpeech = (text) => {
             }
           }
 
-          // If no preferred voice found, try any British female voice
+          // If no preferred voice found, try any British voice
           if (!foundVoice) {
-            const britishFemaleVoice = voices.find(
-              (v) =>
-                v.lang.startsWith("en-GB") &&
-                v.name.toLowerCase().includes("female")
-            );
-            if (britishFemaleVoice) {
-              utterance.voice = britishFemaleVoice;
+            const britishVoice = voices.find((v) => v.lang.startsWith("en-GB"));
+            if (britishVoice) {
+              utterance.voice = britishVoice;
               foundVoice = true;
-              console.log(
-                "Using British female voice:",
-                britishFemaleVoice.name
-              );
+              console.log("Using British voice:", britishVoice.name);
             }
           }
 
-          // Last resort: any female voice
+          // Last resort: any English voice
           if (!foundVoice) {
-            const femaleVoice = voices.find((v) =>
-              v.name.toLowerCase().includes("female")
-            );
-            if (femaleVoice) {
-              utterance.voice = femaleVoice;
+            const englishVoice = voices.find((v) => v.lang.startsWith("en"));
+            if (englishVoice) {
+              utterance.voice = englishVoice;
               foundVoice = true;
-              console.log("Using female voice:", femaleVoice.name);
+              console.log("Using English voice:", englishVoice.name);
             }
           }
         }
@@ -399,18 +408,19 @@ const synthesizeWithWebSpeech = (text) => {
 
       const utterance = new SpeechSynthesisUtterance(text);
 
-      // Configure voice and options for a young British female voice
-      utterance.rate = 1.0; // Normal speed for more natural speech
-      utterance.pitch = 1.2; // Slightly higher pitch for female voice
+      // Configure voice options for better quality
+      utterance.rate = 0.9; // Slightly slower for more natural speech
+      utterance.pitch = 1.1; // Slightly higher pitch for clarity
       utterance.volume = 1.0; // Full volume
 
-      // Try to find a British female voice
+      // Try to find a good voice
       const preferredVoices = [
         "Google UK English Female",
-        "Samantha", // macOS British female
-        "Microsoft Zira", // Windows British female
-        "Karen", // macOS Australian female (fallback)
-        "Microsoft Hazel", // Windows British female
+        "Google UK English Male",
+        "Microsoft Zira",
+        "Samantha",
+        "Karen",
+        "Microsoft Hazel",
       ];
 
       let foundVoice = false;
@@ -426,29 +436,23 @@ const synthesizeWithWebSpeech = (text) => {
           }
         }
 
-        // If no preferred voice found, try any British female voice
+        // If no preferred voice found, try any British voice
         if (!foundVoice) {
-          const britishFemaleVoice = voices.find(
-            (v) =>
-              v.lang.startsWith("en-GB") &&
-              v.name.toLowerCase().includes("female")
-          );
-          if (britishFemaleVoice) {
-            utterance.voice = britishFemaleVoice;
+          const britishVoice = voices.find((v) => v.lang.startsWith("en-GB"));
+          if (britishVoice) {
+            utterance.voice = britishVoice;
             foundVoice = true;
-            console.log("Using British female voice:", britishFemaleVoice.name);
+            console.log("Using British voice:", britishVoice.name);
           }
         }
 
-        // Last resort: any female voice
+        // Last resort: any English voice
         if (!foundVoice) {
-          const femaleVoice = voices.find((v) =>
-            v.name.toLowerCase().includes("female")
-          );
-          if (femaleVoice) {
-            utterance.voice = femaleVoice;
+          const englishVoice = voices.find((v) => v.lang.startsWith("en"));
+          if (englishVoice) {
+            utterance.voice = englishVoice;
             foundVoice = true;
-            console.log("Using female voice:", femaleVoice.name);
+            console.log("Using English voice:", englishVoice.name);
           }
         }
       }
@@ -598,129 +602,91 @@ const writeString = (view, offset, string) => {
  * @returns {Promise<Blob>} - The audio blob
  */
 export const textToSpeech = async (text) => {
-  // Maximum number of retry attempts
-  const maxRetries = 2;
-  let lastError = null;
+  try {
+    console.log("Starting text-to-speech synthesis");
 
-  // Try multiple times with exponential backoff
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      // Log retry attempts
-      if (attempt > 0) {
-        console.log(
-          `TTS attempt ${attempt}/${maxRetries} after previous failure`
+    // Process text to improve naturalness
+    const processedText = processTextForSpeech(text);
+
+    // Check if VITS TTS is available
+    if (window.vitsTTS && window.vitsTTS.synthesize) {
+      console.log("Using VITS TTS for synthesis");
+
+      // Set a timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(
+          () => reject(new Error("VITS TTS synthesis timed out")),
+          15000
         );
-        // Short delay before retry with exponential backoff
-        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
-      }
+      });
 
-      // Check if API key is available
-      const apiKey = localStorage.getItem("elevenLabsApiKey");
-      if (!apiKey) {
-        console.warn(
-          "No ElevenLabs API key found, falling back to Web Speech API"
-        );
-        return synthesizeWithWebSpeech(text);
-      }
+      // Race between VITS synthesis and timeout
+      const audioBlob = await Promise.race([
+        window.vitsTTS.synthesize(processedText, {
+          speaker: "zephyr", // Use zephyr voice as requested
+          speed: 0.95, // Slightly slower for better clarity
+          pitch: 0.0, // Normal pitch
+          emphasis: 1.0, // Normal emphasis
+          // Do not use SSML tags since they're causing issues
+          ssml: false,
+          prosody: false,
+        }),
+        timeoutPromise,
+      ]).catch((error) => {
+        console.error("VITS TTS synthesis error or timeout:", error);
+        // Return null to indicate error
+        return null;
+      });
 
-      // Validate text
-      if (!text || text.trim() === "") {
-        console.error("Empty text provided to TTS");
-        throw new Error("Empty text provided");
-      }
-
-      // Prepare the request
-      const url =
-        "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM";
-
-      // Voice settings optimized for natural speech
-      const voiceSettings = {
-        stability: 0.3,
-        similarity_boost: 0.75,
-        style: 0.3,
-        use_speaker_boost: true,
-      };
-
-      const headers = {
-        "Content-Type": "application/json",
-        "xi-api-key": apiKey,
-      };
-
-      // Log request to help debug
-      console.log(
-        `Sending TTS request to ElevenLabs API. Text length: ${text.length} characters`
-      );
-
-      // Set a request timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 25000);
-
-      try {
-        // Make the API call with timeout
-        const response = await fetch(url, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            text,
-            model_id: "eleven_monolingual_v1",
-            voice_settings: voiceSettings,
-          }),
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-        // Handle non-200 responses
-        if (!response.ok) {
-          const errorData = await response.text();
-          console.error("ElevenLabs API error:", response.status, errorData);
-          throw new Error(`ElevenLabs API error: ${response.status}`);
-        }
-
-        // Get the audio blob
-        const audioBlob = await response.blob();
-
-        // Check if the blob is empty
-        if (!audioBlob || audioBlob.size === 0) {
-          console.error("Received empty audio blob from ElevenLabs API");
-          throw new Error("Empty audio blob received");
-        }
-
-        console.log(`TTS successful. Audio size: ${audioBlob.size} bytes`);
-
+      if (audioBlob) {
+        console.log("VITS TTS synthesis successful");
         return audioBlob;
-      } finally {
-        clearTimeout(timeoutId);
       }
-    } catch (error) {
-      console.error(
-        `TTS error on attempt ${attempt + 1}/${maxRetries + 1}:`,
-        error
-      );
-      lastError = error;
-
-      // If this is the final attempt, check if it's a timeout or other specific error
-      if (attempt === maxRetries) {
-        // Check if the error is due to AbortController timeout
-        if (error.name === "AbortError") {
-          console.warn("TTS request timed out, falling back to Web Speech API");
-          return synthesizeWithWebSpeech(text);
-        }
-
-        // If we've exhausted all retries, fall back to Web Speech API
-        console.warn(
-          `All ${
-            maxRetries + 1
-          } TTS attempts failed, falling back to Web Speech API`
-        );
-        return synthesizeWithWebSpeech(text);
-      }
-      // Otherwise continue to next retry attempt
     }
-  }
 
-  // This should not happen since we handle the maxRetries case above
-  throw lastError;
+    // Fallback to ElevenLabs if VITS fails
+    if (window.elevenLabsTTS && window.elevenLabsTTS.synthesize) {
+      console.log("Falling back to ElevenLabs TTS");
+
+      // Set a timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(
+          () => reject(new Error("ElevenLabs TTS synthesis timed out")),
+          15000
+        );
+      });
+
+      // Race between ElevenLabs synthesis and timeout
+      const audioBlob = await Promise.race([
+        window.elevenLabsTTS.synthesize(processedText, {
+          voice: "zephyr", // Use zephyr voice as requested
+          model: "eleven_multilingual_v2",
+          stability: 0.5, // Balanced stability
+          similarity_boost: 0.75, // Higher similarity for more natural voice
+          style: 0.5, // Balanced style
+          use_speaker_boost: true, // Use speaker boost for better clarity
+        }),
+        timeoutPromise,
+      ]).catch((error) => {
+        console.error("ElevenLabs TTS synthesis error or timeout:", error);
+        // Return null to indicate error
+        return null;
+      });
+
+      if (audioBlob) {
+        console.log("ElevenLabs TTS synthesis successful");
+        return audioBlob;
+      }
+    }
+
+    // Final fallback to Web Speech API
+    console.log("Falling back to Web Speech API");
+    return synthesizeWithWebSpeech(processedText);
+  } catch (error) {
+    console.error("Error in text-to-speech:", error);
+    // Return a dummy audio blob to prevent errors
+    return new Blob([], { type: "audio/wav" });
+  }
 };
 
 /**

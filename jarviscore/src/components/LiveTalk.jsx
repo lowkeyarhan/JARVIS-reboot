@@ -31,6 +31,9 @@ const LiveTalk = ({
   const restartTimeoutRef = useRef(null);
   const wakewordDetectorRef = useRef(null);
 
+  // Add a mutex ref to prevent overlapping operations
+  const audioMutexRef = useRef(false);
+
   // Initialize TTS on component mount
   useEffect(() => {
     const loadTTS = async () => {
@@ -209,12 +212,29 @@ const LiveTalk = ({
 
     // Set up event handlers
     recognition.onstart = () => {
+      // Don't start if audio is playing
+      if (audioMutexRef.current) {
+        console.log("Audio mutex is locked, stopping recognition");
+        try {
+          recognition.stop();
+        } catch (e) {
+          // Ignore errors
+        }
+        return;
+      }
+
       console.log("Speech recognition started");
       isRecognitionActiveRef.current = true;
       setIsListening(true);
     };
 
     recognition.onresult = (event) => {
+      // Skip processing if audio is playing to prevent self-recognition
+      if (audioMutexRef.current) {
+        console.log("Audio mutex is locked, ignoring recognition result");
+        return;
+      }
+
       let interimTranscript = "";
       let finalTranscript = "";
 
@@ -531,6 +551,13 @@ const LiveTalk = ({
           currentAudioRef.current = null;
         }
 
+        // Temporarily pause speech recognition to prevent self-recognition
+        const wasListening = isListening;
+        if (wasListening) {
+          console.log("Pausing speech recognition during API call");
+          stopListening();
+        }
+
         // Add user message to history
         addToConversationHistory("user", message);
 
@@ -541,6 +568,15 @@ const LiveTalk = ({
         // Use the provided onSendMessage which is now our direct API call
         console.log("Sending message to API:", message);
         const response = await onSendMessage(message, conversationContext);
+
+        // Resume speech recognition if it was active before
+        if (wasListening && isActive && !audioMutexRef.current) {
+          console.log("Resuming speech recognition after API call");
+          setTimeout(() => {
+            initializeSpeechRecognition();
+            startListening();
+          }, 500);
+        }
 
         if (!response) {
           console.error("No response received from API");
@@ -679,6 +715,9 @@ const LiveTalk = ({
       const wasListening = isListening;
       console.log("Audio playback starting - disabling speech recognition");
 
+      // Set the audio mutex to prevent speech recognition
+      audioMutexRef.current = true;
+
       // Force stop recognition and remove all handlers
       stopListening();
 
@@ -704,9 +743,11 @@ const LiveTalk = ({
         }
       }
 
+      // Process text to improve naturalness
+      const processedText = enhanceTextForSpeech(text);
       console.log(
         "Processing text for speech synthesis:",
-        text.substring(0, 30) + "..."
+        processedText.substring(0, 30) + "..."
       );
 
       // Set a timeout to prevent hanging
@@ -716,7 +757,7 @@ const LiveTalk = ({
 
       // Race between regular synthesis and timeout
       const audioBlob = await Promise.race([
-        textToSpeech(text),
+        textToSpeech(processedText),
         timeoutPromise,
       ]).catch((error) => {
         console.error("TTS synthesis error or timeout:", error);
@@ -726,9 +767,9 @@ const LiveTalk = ({
 
       if (!audioBlob) {
         // Try a second time with a shorter text if the first attempt failed
-        if (text.length > 100) {
+        if (processedText.length > 100) {
           console.log("Retrying with shorter text");
-          const shorterText = text.substring(0, 100) + "...";
+          const shorterText = processedText.substring(0, 100) + "...";
           showAssistantSpeech(shorterText);
 
           // Try again with shorter text
@@ -750,11 +791,16 @@ const LiveTalk = ({
                 console.log(
                   "Audio finished - fully reinitializing speech recognition"
                 );
+                // Release the audio mutex
+                audioMutexRef.current = false;
                 setTimeout(() => {
                   // Completely reinitialize with new instance
                   initializeSpeechRecognition();
                   startListening();
                 }, 500);
+              } else {
+                // Release the audio mutex even if we're not restarting
+                audioMutexRef.current = false;
               }
             };
 
@@ -783,6 +829,8 @@ const LiveTalk = ({
           }
         }
 
+        // Release the audio mutex if we failed to get audio
+        audioMutexRef.current = false;
         throw new Error("Failed to synthesize speech");
       }
 
@@ -796,11 +844,16 @@ const LiveTalk = ({
           console.log(
             "Audio finished - fully reinitializing speech recognition"
           );
+          // Release the audio mutex
+          audioMutexRef.current = false;
           setTimeout(() => {
             // Completely reinitialize with new instance
             initializeSpeechRecognition();
             startListening();
           }, 500);
+        } else {
+          // Release the audio mutex even if we're not restarting
+          audioMutexRef.current = false;
         }
       };
 
@@ -825,7 +878,10 @@ const LiveTalk = ({
       });
 
       // Add a backup timer to resume speech recognition in case the ended event doesn't fire
-      const estimatedDuration = Math.max(30, (text.length / 10) * 1000); // Rough estimate: ~10 chars per second
+      const estimatedDuration = Math.max(
+        30,
+        (processedText.length / 10) * 1000
+      ); // Rough estimate: ~10 chars per second
       const audioBackupTimer = setTimeout(() => {
         console.log("Audio backup timer triggered");
         if (!isRecognitionActiveRef.current) {
@@ -841,6 +897,9 @@ const LiveTalk = ({
         "I apologize, but I encountered an error with the text-to-speech system."
       );
 
+      // Release the audio mutex if we encountered an error
+      audioMutexRef.current = false;
+
       // Resume speech recognition if it was active before
       if (isActive) {
         console.log("Resuming speech recognition after TTS error");
@@ -852,6 +911,43 @@ const LiveTalk = ({
     } finally {
       setIsSpeaking(false);
     }
+  };
+
+  // Enhance text for more natural speech
+  const enhanceTextForSpeech = (text) => {
+    if (!text) return "";
+
+    // Simple text cleaning instead of complex SSML
+    let enhanced = text.trim();
+
+    // Clean up any potential HTML/SSML tags already in the text
+    enhanced = enhanced.replace(/<[^>]*>/g, "");
+
+    // Replace multiple spaces with single space
+    enhanced = enhanced.replace(/\s+/g, " ");
+
+    // Ensure proper spacing after punctuation
+    enhanced = enhanced.replace(/([.,;:!?])(\w)/g, "$1 $2");
+
+    // Fix common abbrevations
+    enhanced = enhanced.replace(/(\w)\.(\w)/g, "$1. $2"); // Fix abbrevs like "e.g." -> "e. g."
+
+    // Replace em dashes with commas for better pausing
+    enhanced = enhanced.replace(/—/g, ", ");
+
+    // Add periods to make sure sentences end properly
+    if (
+      !enhanced.endsWith(".") &&
+      !enhanced.endsWith("!") &&
+      !enhanced.endsWith("?")
+    ) {
+      enhanced += ".";
+    }
+
+    // Add space after numbered lists for better parsing
+    enhanced = enhanced.replace(/(\d+\.)(\w)/g, "$1 $2");
+
+    return enhanced;
   };
 
   // Start listening - simplified approach
@@ -928,6 +1024,33 @@ const LiveTalk = ({
       startListening();
     }
 
+    // Add audio detection to prevent self-recognition
+    const audioDetectionInterval = setInterval(() => {
+      // Check if any audio is playing in the document
+      const audioElements = document.querySelectorAll("audio, video");
+      let isAudioPlaying = false;
+
+      audioElements.forEach((audio) => {
+        if (!audio.paused && !audio.ended && audio.volume > 0) {
+          isAudioPlaying = true;
+        }
+      });
+
+      // If audio is playing and recognition is active, pause it
+      if (isAudioPlaying && isRecognitionActiveRef.current) {
+        console.log("Audio detected playing - pausing speech recognition");
+        stopListening();
+        // Set the audio mutex to prevent speech recognition
+        audioMutexRef.current = true;
+
+        // Set a timer to release the mutex after a reasonable time
+        setTimeout(() => {
+          audioMutexRef.current = false;
+          console.log("Audio mutex released after timeout");
+        }, 10000); // 10 seconds should be enough for most audio to finish
+      }
+    }, 500);
+
     return () => {
       // Clean up on unmount
       if (recognitionRef.current) {
@@ -954,6 +1077,9 @@ const LiveTalk = ({
       if (assistantTimerRef.current) {
         clearTimeout(assistantTimerRef.current);
       }
+
+      // Clear the audio detection interval
+      clearInterval(audioDetectionInterval);
     };
   }, [isActive]);
 
