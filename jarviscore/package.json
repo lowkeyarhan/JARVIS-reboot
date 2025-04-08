@@ -16,6 +16,7 @@
     "highlight.js": "^11.11.1",
     "katex": "^0.16.21",
     "marked": "^15.0.7",
+    "onnxruntime-web": "^1.21.0",
     "pdfjs-dist": "^5.1.91",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

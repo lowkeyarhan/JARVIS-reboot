@@ -939,27 +939,121 @@ function MainContainer() {
   };
 
   // Direct API call handler for Live Talk without adding to chat
-  const handleLiveTalkDirectApi = async (message) => {
+  const handleLiveTalkDirectApi = async (message, conversationHistory = []) => {
     if (!message.trim() || !apiAvailable) return null;
 
     try {
-      // Extract current conversation context for API
-      const context = activeMessages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-        ...(msg.image && { image: msg.image }),
-      }));
+      // Combine current conversation context with provided history
+      // We prioritize the provided conversation history (from LiveTalk)
+      // but fall back to the active messages if no history is provided
+      let apiMessages = [];
 
-      // Create messages array for the API call
-      const apiMessages = [...context, { role: "user", content: message }];
+      if (conversationHistory && conversationHistory.length > 0) {
+        // Use the conversation history from LiveTalk component if available
+        console.log(
+          `Using ${conversationHistory.length} messages from LiveTalk history`
+        );
+        apiMessages = [...conversationHistory];
 
-      // Call Gemini API directly
-      const response = await generateGeminiResponse(apiMessages);
+        // Add the current message if it's not already included
+        if (
+          !apiMessages.some(
+            (msg) => msg.role === "user" && msg.content === message
+          )
+        ) {
+          apiMessages.push({ role: "user", content: message });
+        }
+      } else {
+        // Fall back to current active messages if no history provided
+        console.log("No LiveTalk history provided, using active messages");
+        const context = activeMessages.map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+          ...(msg.image && { image: msg.image }),
+        }));
 
-      return {
-        role: "assistant",
-        content: response || "I couldn't process that request.",
+        apiMessages = [...context, { role: "user", content: message }];
+      }
+
+      // Define system instruction for live talk mode
+      const liveTalkSystemInstruction = {
+        role: "system",
+        parts: [
+          {
+            text: `You are now in voice conversation mode. 
+            You are el pensador, the thinking assistant.
+            Keep the responses very short, concise and to the point.
+            Your responses should be no more than 2 sentences, perfectly optimized for text-to-speech.
+            Include pauses, punctuation and other natural speech features.
+            `,
+          },
+        ],
       };
+
+      // Extract any system messages from apiMessages
+      const nonSystemMessages = apiMessages.filter(
+        (msg) => msg.role !== "system"
+      );
+
+      // Call Gemini API with the custom system instruction
+      const payload = {
+        contents: nonSystemMessages.map((msg) => ({
+          role: msg.role === "assistant" ? "model" : "user",
+          parts: [{ text: msg.content }],
+        })),
+        systemInstruction: liveTalkSystemInstruction,
+        generationConfig: {
+          temperature: 0.9,
+          topP: 0.95,
+          topK: 40,
+          maxOutputTokens: 256, // Limited for speech
+        },
+      };
+
+      console.log("Sending Live Talk API request with system instruction");
+
+      // Make direct API call
+      const apiUrl =
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyAR2Y-3i75WrJCzhPZ7IIsylrewzBKJCYY";
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `API Error: ${errorData.error?.message || response.statusText}`
+        );
+      }
+
+      // Parse the response
+      const data = await response.json();
+
+      // Extract the text response
+      if (
+        data.candidates &&
+        data.candidates.length > 0 &&
+        data.candidates[0].content &&
+        data.candidates[0].content.parts &&
+        data.candidates[0].content.parts.length > 0
+      ) {
+        const responseText = data.candidates[0].content.parts[0].text;
+        console.log(
+          "Live Talk API response received:",
+          responseText.substring(0, 50) + "..."
+        );
+
+        return {
+          role: "assistant",
+          content: responseText || "I couldn't process that request.",
+        };
+      } else {
+        throw new Error("Unexpected API response format");
+      }
     } catch (error) {
       console.error("Error in live talk API call:", error);
       return {
