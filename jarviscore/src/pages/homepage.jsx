@@ -11,74 +11,84 @@ function Homepage() {
     createCircuitBackground();
     createReactorGlow();
     return () => {
-      const circuitDots = document.querySelectorAll(
-        ".circuit-line, .circuit-dot, .secondary-glow"
-      );
-      circuitDots.forEach((el) => el.remove());
+      document
+        .querySelectorAll(".circuit-line, .circuit-dot, .secondary-glow")
+        .forEach((el) => el.remove());
     };
   }, []);
 
   const createCircuitBackground = () => {
-    if (circuitRef.current) {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
+    if (!circuitRef.current) return;
 
-      for (let i = 0; i < 15; i++) {
-        const hLine = document.createElement("div");
-        hLine.className = "circuit-line";
-        hLine.style.width = `${Math.random() * 200 + 100}px`;
-        hLine.style.height = "1px";
-        hLine.style.top = `${Math.random() * height}px`;
-        hLine.style.left = `${Math.random() * (width - 300)}px`;
-        circuitRef.current.appendChild(hLine);
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const numLines = 15;
 
-        const vLine = document.createElement("div");
-        vLine.className = "circuit-line";
-        vLine.style.width = "1px";
-        vLine.style.height = `${Math.random() * 200 + 100}px`;
-        vLine.style.top = `${Math.random() * (height - 300)}px`;
-        vLine.style.left = `${Math.random() * width}px`;
-        circuitRef.current.appendChild(vLine);
+    for (let i = 0; i < numLines; i++) {
+      // Create horizontal line
+      const hLine = createLine({
+        width: `${Math.random() * 200 + 100}px`,
+        height: "1px",
+        top: `${Math.random() * height}px`,
+        left: `${Math.random() * (width - 300)}px`,
+      });
 
-        addCircuitDot(hLine, 0, 0);
-        addCircuitDot(hLine, parseInt(hLine.style.width), 0);
-        addCircuitDot(vLine, 0, 0);
-        addCircuitDot(vLine, 0, parseInt(vLine.style.height));
-      }
+      // Create vertical line
+      const vLine = createLine({
+        width: "1px",
+        height: `${Math.random() * 200 + 100}px`,
+        top: `${Math.random() * (height - 300)}px`,
+        left: `${Math.random() * width}px`,
+      });
+
+      // Add dots to both lines
+      [hLine, vLine].forEach((line) => {
+        addCircuitDot(line, 0, 0);
+        addCircuitDot(
+          line,
+          parseInt(line.style.width),
+          parseInt(line.style.height)
+        );
+      });
     }
+  };
+
+  const createLine = (styles) => {
+    const line = document.createElement("div");
+    line.className = "circuit-line";
+    Object.assign(line.style, styles);
+    circuitRef.current.appendChild(line);
+    return line;
   };
 
   const addCircuitDot = (line, xOffset, yOffset) => {
     const dot = document.createElement("div");
     dot.className = "circuit-dot";
-    dot.style.width = "4px";
-    dot.style.height = "4px";
-    dot.style.left = `${xOffset - 2}px`;
-    dot.style.top = `${yOffset - 2}px`;
+    Object.assign(dot.style, {
+      width: "4px",
+      height: "4px",
+      left: `${xOffset - 2}px`,
+      top: `${yOffset - 2}px`,
+      animationDelay: `${Math.random() * 3}s`,
+    });
     line.appendChild(dot);
-
-    // Random pulse delay
-    dot.style.animationDelay = `${Math.random() * 3}s`;
   };
 
   const createReactorGlow = () => {
-    if (reactorRef.current) {
-      // Create 3 smaller glows
-      for (let i = 0; i < 3; i++) {
-        const glow = document.createElement("div");
-        glow.className = "secondary-glow";
+    if (!reactorRef.current) return;
 
-        const top = Math.random() * 70 + 10; // 10-80% vertically
-        const left = Math.random() * 70 + 10; // 10-80% horizontally
-
-        glow.style.top = `${top}%`;
-        glow.style.left = `${left}%`;
-        glow.style.width = `${Math.random() * 150 + 50}px`; // 50-200px size
-        glow.style.height = glow.style.width;
-        glow.style.animationDelay = `${Math.random() * 5}s`; // Random delay
-
-        document.body.appendChild(glow);
-      }
+    for (let i = 0; i < 3; i++) {
+      const size = `${Math.random() * 150 + 50}px`;
+      const glow = document.createElement("div");
+      glow.className = "secondary-glow";
+      Object.assign(glow.style, {
+        top: `${Math.random() * 70 + 10}%`,
+        left: `${Math.random() * 70 + 10}%`,
+        width: size,
+        height: size,
+        animationDelay: `${Math.random() * 5}s`,
+      });
+      document.body.appendChild(glow);
     }
   };
 
@@ -91,4 +101,5 @@ function Homepage() {
     </div>
   );
 }
+
 export default Homepage;

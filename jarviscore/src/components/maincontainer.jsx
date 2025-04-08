@@ -26,39 +26,23 @@ import {
   extractLanguage,
 } from "../utils/codeFormatter.js";
 
-// Configure marked options for security and customization
+// Configure marked options
 marked.setOptions({
-  gfm: true, // Enable GitHub Flavored Markdown
-  breaks: true, // Add <br> on single line breaks
-  headerIds: true, // Enable automatic header IDs
-  mangle: false, // Disable mangling email addresses
-  sanitize: false, // Let DOMPurify handle sanitization
-  highlight: function (code, lang) {
+  gfm: true,
+  breaks: true,
+  headerIds: true,
+  mangle: false,
+  sanitize: false,
+  highlight: (code, lang) => {
     try {
-      if (typeof code !== "string") {
-        code = String(code || "");
-      }
-      if (!lang || lang === "") {
-        return hljs.highlightAuto(code).value;
-      }
-
-      if (hljs.getLanguage(lang)) {
-        return hljs.highlight(code, { language: lang }).value;
-      } else {
-        console.warn(
-          `Language '${lang}' not supported by highlight.js, using plaintext`
-        );
-        return hljs.highlight(code, { language: "plaintext" }).value;
-      }
+      code = String(code || "");
+      if (!lang) return hljs.highlightAuto(code).value;
+      return hljs.getLanguage(lang)
+        ? hljs.highlight(code, { language: lang }).value
+        : hljs.highlight(code, { language: "plaintext" }).value;
     } catch (error) {
       console.error("Highlight.js error:", error);
-      // Fallback to plaintext with escaped HTML
-      return code
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+      return escapeHtml(code);
     }
   },
   langPrefix: "hljs language-",
@@ -70,71 +54,33 @@ marked.setOptions({
 
 const renderer = new marked.Renderer();
 
-// Customize code blocks with language labels and copy buttons
-renderer.code = function (code, language) {
-  let validLanguage = "plaintext";
-  let highlightedCode = "";
-
+// Customize code blocks
+renderer.code = (code, language) => {
   try {
-    // Extract language from the code object if it exists
+    let validLanguage = "plaintext";
+    let highlightedCode = "";
+    let codeContent = code;
+
     if (typeof code === "object" && code !== null) {
-      // Use the language from the object or fall back to the provided language
-      const extractedLang = extractLanguage(code, language || "plaintext");
-      language = extractedLang || language;
-
-      // Extract the actual code content
+      language = extractLanguage(code, language || "plaintext");
       const extracted = extractCodeContent(code);
-      if (typeof extracted === "string") {
-        code = extracted;
-      }
+      if (typeof extracted === "string") codeContent = extracted;
     }
 
-    if (
-      typeof code === "object" &&
-      code !== null &&
-      (language === "json" || !language)
-    ) {
+    if (typeof codeContent === "object" && (language === "json" || !language)) {
       validLanguage = "json";
-
-      // Use our special JSON formatter
-      highlightedCode = formatJsonWithHighlighting(code);
-
-      // Use properly serialized JSON for the copy button
-      const jsonForCopy = JSON.stringify(code, null, 2);
-
-      return `
-        <div class="code-block">
-          <div class="code-block-header">
-            <span>${validLanguage}</span>
-            <button class="copy-btn" data-code="${encodeURIComponent(
-              jsonForCopy
-            )}">
-              <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon">
-                <path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
-                <path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
-              </svg>
-              <span class="copy-text">Copy</span>
-            </button>
-          </div>
-          <div class="code-block-body">
-          <pre><code>${highlightedCode}</code></pre>
-          </div>
-        </div>
-      `;
+      highlightedCode = formatJsonWithHighlighting(codeContent);
+      codeContent = JSON.stringify(codeContent, null, 2);
+    } else {
+      codeContent = formatCode(codeContent);
+      validLanguage = normalizeLanguage(language || "plaintext");
+      highlightedCode = hljs.highlight(codeContent, {
+        language: validLanguage,
+        ignoreIllegals: true,
+      }).value;
     }
 
-    // For regular code blocks
-    code = formatCode(code);
-    validLanguage = normalizeLanguage(language || "plaintext");
-
-    highlightedCode = hljs.highlight(code, {
-      language: validLanguage,
-      ignoreIllegals: true,
-    }).value;
-
-    // Make sure the code is properly encoded for the data attribute
-    const encodedCode = encodeURIComponent(code);
-
+    const encodedCode = encodeURIComponent(codeContent);
     return `
       <div class="code-block">
         <div class="code-block-header">
@@ -148,18 +94,15 @@ renderer.code = function (code, language) {
           </button>
         </div>
         <div class="code-block-body">
-        <pre><code>${highlightedCode}</code></pre>
+          <pre><code>${highlightedCode}</code></pre>
         </div>
       </div>
     `;
   } catch (error) {
     console.error("Error highlighting code:", error);
-
-    // Ensure error case also properly encodes content
     const encodedCode = encodeURIComponent(
       typeof code === "string" ? code : String(code)
     );
-
     return `
       <div class="code-block">
         <div class="code-block-header">
@@ -173,7 +116,7 @@ renderer.code = function (code, language) {
           </button>
         </div>
         <div class="code-block-body">
-        <pre><code>${escapeHtml(code)}</code></pre>
+          <pre><code>${escapeHtml(code)}</code></pre>
         </div>
       </div>
     `;
@@ -181,24 +124,19 @@ renderer.code = function (code, language) {
 };
 
 // Customize inline code
-renderer.codespan = function (code) {
+renderer.codespan = (code) => {
   try {
     if (typeof code === "object" && code !== null) {
       const extracted = extractCodeContent(code);
-      if (typeof extracted === "string") {
-        code = extracted;
-      }
+      if (typeof extracted === "string") code = extracted;
     }
-
-    code = formatCode(code);
-    const safeCode = escapeHtml(code);
-
-    return `<code class="inline-code">${safeCode}</code>`;
+    return `<code class="inline-code">${escapeHtml(formatCode(code))}</code>`;
   } catch (error) {
     console.error("Error rendering inline code:", error);
     return `<code class="inline-code">Error rendering code</code>`;
   }
 };
+
 marked.use({ renderer });
 
 function renderMarkdown(content) {
