@@ -245,6 +245,18 @@
   transform: rotate(90deg) scale(1.15);
 }
 
+.pause-button:disabled,
+.close-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.pause-button:disabled i,
+.close-button:disabled i {
+  animation: none;
+}
+
 /* Animations */
 @keyframes fadeIn {
   from {
