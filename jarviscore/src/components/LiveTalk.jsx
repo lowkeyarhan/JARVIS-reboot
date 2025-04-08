@@ -5,7 +5,7 @@ import {
   playAudio,
   isTTSSupported,
   initTTS,
-} from "../services/vitsTts";
+} from "../services/vitsTTS";
 
 const LiveTalk = ({
   isActive,
