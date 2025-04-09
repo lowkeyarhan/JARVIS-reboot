@@ -22,7 +22,7 @@
 
 .code-block code {
   font-family: "Fira Code", monospace;
-  font-size: 14px !important;
+  font-size: 14px;
   color: #d4d4d4;
   padding: 0;
   white-space: pre;
@@ -109,4 +109,19 @@
 .markdown-content li > .code-block {
   margin-top: 0.75em;
   margin-bottom: 0.75em;
+}
+
+/* Responsive design */
+@media (max-width: 950px) {
+  .code-block code {
+    font-size: 12px;
+  }
+  .code-block-header span {
+    font-size: 10px !important;
+    padding: 3px !important;
+  }
+  .copy-btn {
+    font-size: 10px !important;
+    padding: 3px 5px !important;
+  }
 }

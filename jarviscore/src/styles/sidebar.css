@@ -221,3 +221,9 @@
   font-family: "Comfortaa", sans-serif;
 }
 
+/* Responsive media queries */
+@media (max-width: 950px) {
+  .sidebar {
+    display: none;
+  }
+}

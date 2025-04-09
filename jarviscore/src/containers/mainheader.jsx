@@ -13,9 +13,9 @@ function MainHeader() {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
+    if (hour < 12) return "Good morning, ";
+    if (hour < 18) return "Good afternoon, ";
+    return "Good evening, ";
   };
 
   // Update time string
@@ -63,7 +63,7 @@ function MainHeader() {
     <div className="main-header">
       <div className="greeting">
         <h1>
-          <span className="greeting-text">{greeting}</span>, Señor
+          <span className="greeting-text">{greeting}</span> master!
         </h1>
         {showGreeting && <p>How may I assist you today?</p>}
         <div className="status-container">

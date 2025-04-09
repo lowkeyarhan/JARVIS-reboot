@@ -84,7 +84,7 @@ renderer.code = (code, language) => {
     return `
       <div class="code-block">
         <div class="code-block-header">
-          <span>${validLanguage}</span>
+          <span class="language-label">${validLanguage}</span>
           <button class="copy-btn" data-code="${encodedCode}">
             <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon">
               <path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
@@ -106,7 +106,7 @@ renderer.code = (code, language) => {
     return `
       <div class="code-block">
         <div class="code-block-header">
-          <span>code</span>
+          <span class="language-label">code</span>
           <button class="copy-btn" data-code="${encodedCode}">
             <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="copy-icon">
               <path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
@@ -504,6 +504,13 @@ function MainContainer() {
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
+
+      // If microphone is active, deactivate it
+      if (isVoiceActive) {
+        setIsVoiceActive(false);
+        return;
+      }
+
       handleSubmit(e);
     }
   };
@@ -580,6 +587,12 @@ function MainContainer() {
 
   // Handle attachment clicks
   const handleAttachmentClick = (type) => {
+    // Check if we're clicking on an already active feature
+    if (type === "microphone" && isVoiceActive) {
+      setIsVoiceActive(false);
+      return;
+    }
+
     // Reset all attachment states first
     setIsVoiceActive(false);
     setIsImageUploadActive(false);
@@ -1182,52 +1195,54 @@ function MainContainer() {
             className={`message-input ${!apiAvailable ? "error-state" : ""}`}
             disabled={isLoading}
           />
-          <div className="attachments">
-            <span
-              id="photo"
-              className={`${isImageUploadActive ? "active" : ""} ${
-                imageSelected ? "image-selected" : ""
+          <div className="input-controls">
+            <div className="attachments">
+              <span
+                id="photo"
+                className={`${isImageUploadActive ? "active" : ""} ${
+                  imageSelected ? "image-selected" : ""
+                }`}
+                onClick={() => handleAttachmentClick("photo")}
+              >
+                <i className="fa-regular fa-image"></i>
+              </span>
+              <span
+                id="files"
+                className={filesSelected ? "files-selected" : ""}
+                onClick={() => handleAttachmentClick("files")}
+              >
+                <i className="fa-solid fa-paperclip"></i>
+              </span>
+              <span
+                id="microphone-btn"
+                className={isVoiceActive ? "active" : ""}
+                onClick={() => handleAttachmentClick("microphone")}
+              >
+                <i className="fa-solid fa-microphone-lines"></i>
+              </span>
+              <span
+                id="live-talk-btn"
+                className={isLiveTalkActive ? "active" : ""}
+                onClick={() => handleAttachmentClick("live-talk")}
+                title="Live Talk"
+              >
+                <i className="fa-solid fa-headset"></i>
+              </span>
+            </div>
+            <button
+              type="submit"
+              className={`send-button ${
+                isLoading || !apiAvailable ? "disabled" : ""
               }`}
-              onClick={() => handleAttachmentClick("photo")}
+              disabled={
+                isLoading ||
+                !apiAvailable ||
+                (inputMessage.trim() === "" && !imageSelected && !filesSelected)
+              }
             >
-              <i className="fa-regular fa-image"></i>
-            </span>
-            <span
-              id="files"
-              className={filesSelected ? "files-selected" : ""}
-              onClick={() => handleAttachmentClick("files")}
-            >
-              <i className="fa-solid fa-paperclip"></i>
-            </span>
-            <span
-              id="microphone-btn"
-              className={isVoiceActive ? "active" : ""}
-              onClick={() => handleAttachmentClick("microphone")}
-            >
-              <i className="fa-solid fa-microphone-lines"></i>
-            </span>
-            <span
-              id="live-talk-btn"
-              className={isLiveTalkActive ? "active" : ""}
-              onClick={() => handleAttachmentClick("live-talk")}
-              title="Live Talk"
-            >
-              <i className="fa-solid fa-headset"></i>
-            </span>
+              <i className="fa-regular fa-paper-plane"></i>
+            </button>
           </div>
-          <button
-            type="submit"
-            className={`send-button ${
-              isLoading || !apiAvailable ? "disabled" : ""
-            }`}
-            disabled={
-              isLoading ||
-              !apiAvailable ||
-              (inputMessage.trim() === "" && !imageSelected && !filesSelected)
-            }
-          >
-            <i className="fa-regular fa-paper-plane"></i>
-          </button>
         </form>
       </div>
     </div>

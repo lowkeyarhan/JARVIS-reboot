@@ -71,7 +71,8 @@
   );
 }
 
-.code-block-header span {
+.code-block-header span,
+.code-block-header .language-label {
   background-color: rgba(10, 132, 255, 0.15);
   padding: 3px 10px;
   border-radius: 3px;
