@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Sidebar from "../components/sidebar.jsx";
 import MainContainer from "../components/maincontainer.jsx";
 import "../styles/homepage.css";
@@ -6,16 +6,47 @@ import "../styles/homepage.css";
 function Homepage() {
   const particlesRef = useRef(null);
   const bgRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
-    createFireflyParticles();
-    createCloudyBackground();
+    // Check if we should display animations based on viewport width
+    const checkViewportWidth = () => {
+      const isMobileView = window.innerWidth < 768;
+      setIsMobile(isMobileView);
 
-    // Clean up all created elements on unmount
-    return () =>
+      console.log(
+        `Viewport width: ${window.innerWidth}px, Animations ${
+          isMobileView ? "disabled" : "enabled"
+        }`
+      );
+
+      // Clear existing animations
+      if (particlesRef.current && bgRef.current) {
+        document
+          .querySelectorAll(".firefly-particle, .cloud-gradient")
+          .forEach((el) => el.remove());
+      }
+
+      // Only create animations if not on mobile
+      if (!isMobileView) {
+        createFireflyParticles();
+        createCloudyBackground();
+      }
+    };
+
+    // Initial check and setup
+    checkViewportWidth();
+
+    // Add resize event listener
+    window.addEventListener("resize", checkViewportWidth);
+
+    // Clean up event listener and animations on unmount
+    return () => {
+      window.removeEventListener("resize", checkViewportWidth);
       document
         .querySelectorAll(".firefly-particle, .cloud-gradient")
         .forEach((el) => el.remove());
+    };
   }, []);
 
   const createFireflyParticles = () => {
@@ -132,8 +163,12 @@ function Homepage() {
 
   return (
     <div className="homepage">
-      <div className="cloudy-background" ref={bgRef}></div>
-      <div className="particles-container" ref={particlesRef}></div>
+      {!isMobile && (
+        <>
+          <div className="cloudy-background" ref={bgRef}></div>
+          <div className="particles-container" ref={particlesRef}></div>
+        </>
+      )}
       <Sidebar />
       <MainContainer />
     </div>

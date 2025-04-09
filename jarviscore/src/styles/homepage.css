@@ -91,3 +91,17 @@
 .homepage:has(.cloudy-background) .cloud-gradient {
   opacity: 1;
 }
+
+/* Hide animations on mobile devices */
+@media (max-width: 768px) {
+  .particles-container,
+  .cloudy-background {
+    display: none !important;
+  }
+
+  .firefly-particle,
+  .cloud-gradient {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
