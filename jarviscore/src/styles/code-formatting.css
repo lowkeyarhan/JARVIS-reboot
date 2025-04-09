@@ -112,7 +112,7 @@
 }
 
 /* Responsive design */
-@media (max-width: 950px) {
+@media (max-width: 768px) {
   .code-block code {
     font-size: 12px;
   }

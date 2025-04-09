@@ -101,7 +101,7 @@
 }
 
 /* responsive */
-@media (max-width: 950px) {
+@media (max-width: 768px) {
   .selected-files-container {
     margin: 0px;
     border-radius: 0px;

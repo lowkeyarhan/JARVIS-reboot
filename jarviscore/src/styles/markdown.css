@@ -364,7 +364,7 @@
 }
 
 /* Responsive design */
-@media (max-width: 950px) {
+@media (max-width: 768px) {
   .markdown-content {
     padding: 0px;
     line-height: 1.5 !important;

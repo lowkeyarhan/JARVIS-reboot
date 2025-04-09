@@ -222,7 +222,7 @@
 }
 
 /* Responsive media queries */
-@media (max-width: 950px) {
+@media (max-width: 768px) {
   .sidebar {
     display: none;
   }

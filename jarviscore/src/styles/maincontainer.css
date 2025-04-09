@@ -1017,7 +1017,7 @@
 }
 
 /* Responsive design */
-@media (max-width: 950px) {
+@media (max-width: 768px) {
   /* Header components */
   .main-header {
     padding: 20px 10px;
