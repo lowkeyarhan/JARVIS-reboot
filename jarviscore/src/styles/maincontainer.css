@@ -1018,6 +1018,15 @@
 
 /* Responsive design */
 @media (max-width: 768px) {
+  /* Fix main container overflow */
+  .main-container {
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
   /* Header components */
   .main-header {
     padding: 20px 10px;
@@ -1045,7 +1054,10 @@
 
   /* Chat components */
   .chat-container {
+    flex: 1;
+    overflow-y: auto;
     padding: 20px 4%;
+    max-height: calc(100vh - 180px);
   }
   .message {
     max-width: 95%;
@@ -1057,9 +1069,19 @@
     font-size: 10px;
   }
 
-  /* Textarea components */
-  .input-container{
+  /* Input components */
+  .input-container {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
     padding: 10px;
+    z-index: 20;
+    background: linear-gradient(
+      0deg,
+      rgba(10, 14, 23, 0.98) 0%,
+      rgba(10, 14, 23, 0.95) 100%
+    );
   }
   .input-container form {
     flex-direction: column;
@@ -1070,17 +1092,24 @@
     width: 100% !important;
     margin: 0px;
     padding: 5px;
+    max-height: 100px;
+    min-height: 24px;
   }
   .input-controls {
     display: flex;
     width: 100%;
     justify-content: space-between;
+    margin-top: 5px;
   }
   .attachments {
     margin-right: 0;
   }
   .attachments span i {
     font-size: 16px;
+  }
+  .send-button {
+    height: 36px;
+    width: 36px;
   }
 }
 
@@ -1089,5 +1118,4 @@
   .greeting h1 {
     font-size: 24px;
   }
-  
 }
