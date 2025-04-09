@@ -225,7 +225,7 @@ const FileUpload = ({ onFileUpload, isActive, setIsActive }) => {
 
           {selectedFiles.length > 1 && (
             <button className="clear-all-btn" onClick={handleClearAll}>
-              Clear all
+              <i className="fa-solid fa-trash"></i>
             </button>
           )}
         </div>
