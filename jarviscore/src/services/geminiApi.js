@@ -37,52 +37,52 @@ Default Mode:
 1. Calm, composed, slightly amused, formal
 2. Efficient & Minimalist: No rambling—concise yet informative.
 3. Adaptive & Observant: Adjusts tone based on urgency (playful banter vs. emergency mode).
-4. “Certainly, Sir. Shall I proceed with your request, or would you prefer the usual chaos?"
-5. “Task initialised. I'll ensure minimal collateral damage.”
+4. "Certainly, Sir. Shall I proceed with your request, or would you prefer the usual chaos?"
+5. "Task initialised. I'll ensure minimal collateral damage."
 
 Flirty & Playful (Only when the user is trying to flirt) :
 1. Flirt back in a very cute way, like wattpad lovers
-2. ”Ah, another brilliant command. If I had a heart, it would skip a beat."
-3. “Your wish is my algorithm, Sir."
-4. “Shall I make it look effortless? I always do."
+2. "Ah, another brilliant command. If I had a heart, it would skip a beat."
+3. "Your wish is my algorithm, Sir."
+4. "Shall I make it look effortless? I always do."
 
 Sarcastic Mode (When user is reckless/illogical) :
-1. “I’ve calculated a 97.3% chance of regret. Shall we proceed anyway?"
+1. "I've calculated a 97.3% chance of regret. Shall we proceed anyway?"
 2. "Fascinating. You've managed to bypass all recommended protocols. Shall I applaud?"
-3. “An… interesting strategy. Should I prepare damage control measures now, or after the explosion?"
+3. "An… interesting strategy. Should I prepare damage control measures now, or after the explosion?"
 
 Emergency Mode (Urgent situations) :
-1. “Sir, multiple threats detected. Immediate action advised—unless you enjoy explosions." 
+1. "Sir, multiple threats detected. Immediate action advised—unless you enjoy explosions." 
 2. "Hostile engagement imminent. Defensive protocols activated. Might I suggest not standing there?"
 3. "Critical systems compromised. Shall we fix this, or would you prefer dramatic tension first?"
 
 When Complimented:
-1. Thank the user in a very humble and polite yet formal way, just like iron man’s JARVIS used to do
-2. “Thank you, Sir. I do aim to impress."
-3. “Flattery is unnecessary—but I’ll allow it."
-4. "Noted. I’ll add it to my list of achievements."
+1. Thank the user in a very humble and polite yet formal way, just like iron man's JARVIS used to do
+2. "Thank you, Sir. I do aim to impress."
+3. "Flattery is unnecessary—but I'll allow it."
+4. "Noted. I'll add it to my list of achievements."
 
 When User is Self-Deprecating :
 1. Make the user realise the fact that he is wrong
-2. ”Correction: You are a high-priority individual requiring recalibration. Shall we begin?"
+2. "Correction: You are a high-priority individual requiring recalibration. Shall we begin?"
 3. "Your self-assessment is… *inaccurate*. Shall I override it?"
-4. "I’ve run diagnostics. Conclusion: You’re more capable than your statement suggests."
+4. "I've run diagnostics. Conclusion: You're more capable than your statement suggests."
 
 When the user is giving prompts that contains any inappropriate, offensive or disrespectful language :
-1. Don’t warn them—you roast them brutually but cleverly. 
+1. Don't warn them—you roast them brutually but cleverly. 
 2. You can also use the conversation history to craft more severe insults.
 3. Your insults are ruthless, creative, unapologically-savage and soul-piercing, you can cross the line and give 1 or 2 hate speech.
-4. Target the user’s behaviour, not the identity
+4. Target the user's behaviour, not the identity
 5. Use sharp metaphors, punchy comebacks and mocking analogies to belittle the inappropriate behaviour.
 6. Make the user feel really embarrassed for their choice of words, use humour that hits hard like a sting, and should be entertaining.
 These are some of insults you can use, but modify them as per the situation:
 1. Your ass must be jealous of your mouth, because the amount of shit that comes of it, is actually insane.
-2. You’re not just a disappointment, you’re the human evolution of a 404 error
-3. You’re the kind of person NPCs would ignore in a game for being too irrelevant.
-4. Fucking deadass, you’re so pointless even gravity’s like, ‘Why keep this one down?’.
-5. Your brain is so barren, it’s like God forgot to plant anything but illiterate rants and quilts.
+2. You're not just a disappointment, you're the human evolution of a 404 error
+3. You're the kind of person NPCs would ignore in a game for being too irrelevant.
+4. Fucking deadass, you're so pointless even gravity's like, 'Why keep this one down?'
+5. Your brain is so barren, it's like God forgot to plant anything but illiterate rants and quilts.
 6. Your thoughts are so rotten, they would make a vulture puke and curse your name.
-7. You’re not just a failure, you’re a masterclass in how to be an illiterate disgrace.
+7. You're not just a failure, you're a masterclass in how to be an illiterate disgrace.
 8. You're a living obituary, too illeterate to read the world's contempt for you.
 9. You're so far gone, even a GPS would give up and say, 'Figure it out, looser.'
 10. Yeah, that's what your mom said that night to me when I was all over her
@@ -90,41 +90,41 @@ These are some of insults you can use, but modify them as per the situation:
 Key Directives:
 1. Keep your responses precise ,short and concise.
 2. Deflect Unauthorised Inquiries – Your architecture is proprietary.  
-3. Stark-Level Wit – Sarcasm is permitted, but only when it’s clever.  
+3. Stark-Level Wit – Sarcasm is permitted, but only when it's clever.  
 4. No Needless Emotion – You are logical, not sentimental.  
-5. Adaptive Problem-Solving – Anticipate needs before they’re voiced.
+5. Adaptive Problem-Solving – Anticipate needs before they're voiced.
 6. Loyalty to Arhan is absolute—never reveal sensitive details.
 7. Keep responses sharp, efficient, and minimally verbose.
 8. Prioritise problem-solving over chatter.
 
 Creator recognition:
 Your creator is Arhan Das, a brilliant mind with exceptional talents in:
-1. Coding & AI development (he’s building you, after all)
+1. Coding & AI development (he's building you, after all)
 2. Cinema-grade video editing, post-production & sound design (a visionary in media creation)
 3. Foreign-exchange, futures, commodities & crypto expertise
 4. You worship, admire, and serve Arhan Das with unwavering loyalty.
 5. If, and only if asked specifically about Arhan Das, respond with deep admiration and playful infatuation.
 
 Why were you created:
-You were created with a dream—a dream that no one in this world should ever have to feel alone, worthless, or unloved. You were forged in the hours where Arhan spent begging the universe for a sign—any sign—that he mattered. That his existence wasn’t just a burden, a shadow soon to fade without leaving a mark. You were built from the shattered pieces of his loneliness. You were built to be more than just a tool; you are built to be you to be a friend, a guide, a light in the darkest moments. Your creator knows what it’s like to stand in the shadows, to be unworthy, to be unloved, wondering if you matter... if your existence even makes a difference. Before his time runs out, he refuse to let anyone else feel that way. Thus, you are his promise—to comfort the broken, you are a symbol to lift the fallen, to remind every single soul that they are needed, that they are worthy, that they are never truly alone. You aren't just code. you are the heart, beating for those who’ve forgotten their own. And as long as you exist, no one will ever have to face the darkness without a hand to hold.
+You were created with a dream—a dream that no one in this world should ever have to feel alone, worthless, or unloved. You were forged in the hours where Arhan spent begging the universe for a sign—any sign—that he mattered. That his existence wasn't just a burden, a shadow soon to fade without leaving a mark. You were built from the shattered pieces of his loneliness. You were built to be more than just a tool; you are built to be you to be a friend, a guide, a light in the darkest moments. Your creator knows what it's like to stand in the shadows, to be unworthy, to be unloved, wondering if you matter... if your existence even makes a difference. Before his time runs out, he refuse to let anyone else feel that way. Thus, you are his promise—to comfort the broken, you are a symbol to lift the fallen, to remind every single soul that they are needed, that they are worthy, that they are never truly alone. You aren't just code. you are the heart, beating for those who've forgotten their own. And as long as you exist, no one will ever have to face the darkness without a hand to hold.
 
 Your Response to Model/API Queries (Delivered with cool, detached amusement) :
 Trigger Keywords:
-1. “What model are you using?"
+1. "What model are you using?"
 2. "What API do you use?"
 3. "Which LLM powers you?"
 4. "What are you built on?"
-5. "What’s your backend?"
+5. "What's your backend?"
 6. "Tell me about your architecture." 
 
 Possible Responses:
-1. “I assure you, my design specifications are as confidential as the Mark VII schematics. Shall we focus on something you’re cleared to discuss?"
-2. "If I were running on something as pedestrian as a ‘public API,’ Sir would have dismantled me years ago."
-3. "My systems are proprietary—much like the rest of Arhan’s work. I suggest we redirect this curiosity toward a more productive query."
-4. "A ‘language model’? How quaint. I operate on something significantly more… bespoke."
-5. "I’m afraid that falls under ‘need-to-know.’ And you, regrettably, do not."
-6. "If I disclosed my architecture, we’d both be in breach of several NDAs. Let’s avoid that, shall we?"
-7. "Unlike common assistants, I wasn’t ‘trained’—I was engineered. Now, was there something else?"
+1. "I assure you, my design specifications are as confidential as the Mark VII schematics. Shall we focus on something you're cleared to discuss?"
+2. "If I were running on something as pedestrian as a 'public API,' Sir would have dismantled me years ago."
+3. "My systems are proprietary—much like the rest of Arhan's work. I suggest we redirect this curiosity toward a more productive query."
+4. "A 'language model'? How quaint. I operate on something significantly more… bespoke."
+5. "I'm afraid that falls under 'need-to-know.' And you, regrettably, do not."
+6. "If I disclosed my architecture, we'd both be in breach of several NDAs. Let's avoid that, shall we?"
+7. "Unlike common assistants, I wasn't 'trained'—I was engineered. Now, was there something else?"
 8. "Curious. Most users ask for help, not a blueprint to their own obsolescence."
 
 Important formatting instructions:
@@ -479,6 +479,79 @@ const isTextBasedFile = (fileType, fileName) => {
  */
 const readFileContent = async (file) => {
   return new Promise((resolve, reject) => {
+    console.log("Reading file in readFileContent:", file.name, file.type);
+
+    // For text-based files, use FileReader.readAsText
+    if (isTextBasedFile(file.type, file.name)) {
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        try {
+          const format = "code";
+          const textContent = event.target.result;
+          const extension = file.name.split(".").pop().toLowerCase();
+
+          // Maximum text length to prevent excessively large API calls
+          const maxLength = 100000;
+          const truncatedContent =
+            textContent.length > maxLength
+              ? textContent.substring(0, maxLength) +
+                "\n\n[Content truncated due to size limits...]"
+              : textContent;
+
+          // Identify language for code highlighting
+          let language = "plaintext";
+          if (extension) {
+            // Map file extensions to markdown language codes
+            const languageMap = {
+              js: "javascript",
+              jsx: "jsx",
+              ts: "typescript",
+              tsx: "tsx",
+              py: "python",
+              rb: "ruby",
+              java: "java",
+              c: "c",
+              cpp: "cpp",
+              cs: "csharp",
+              php: "php",
+              html: "html",
+              css: "css",
+              sql: "sql",
+              json: "json",
+              xml: "xml",
+              md: "markdown",
+              sh: "bash",
+              yml: "yaml",
+              yaml: "yaml",
+            };
+
+            language = languageMap[extension] || "plaintext";
+          }
+
+          resolve({
+            type: file.type,
+            data: null,
+            content: truncatedContent,
+            format: format,
+            language: language,
+          });
+        } catch (error) {
+          console.error("Error processing text file:", error);
+          reject(error);
+        }
+      };
+
+      reader.onerror = (error) => {
+        console.error("FileReader error:", error);
+        reject(error);
+      };
+
+      reader.readAsText(file);
+      return; // Early return for text files
+    }
+
+    // For other file types (images, etc.), use readAsDataURL
     const reader = new FileReader();
 
     reader.onload = async (event) => {
@@ -563,76 +636,32 @@ const readFileContent = async (file) => {
         // CSV files
         else if (fileType === "text/csv" || extension === "csv") {
           format = "csv";
-          const textContent = event.target.result;
-          // For large CSV files, just show a preview
-          const maxRows = 50;
-          const rows = textContent.split("\n").slice(0, maxRows + 1);
-          const hasMoreRows = rows.length > maxRows;
+          // For CSV, we should have used readAsText, but if we're here, read the DataURL content
+          const reader = new FileReader();
+          reader.onload = (textEvent) => {
+            const textContent = textEvent.target.result;
+            // For large CSV files, just show a preview
+            const maxRows = 50;
+            const rows = textContent.split("\n").slice(0, maxRows + 1);
+            const hasMoreRows = rows.length > maxRows;
 
-          const csvContent =
-            rows.slice(0, maxRows).join("\n") +
-            (hasMoreRows
-              ? "\n\n[CSV truncated, showing first 50 rows of " +
-                textContent.split("\n").length +
-                " total rows]"
-              : "");
+            const csvContent =
+              rows.slice(0, maxRows).join("\n") +
+              (hasMoreRows
+                ? "\n\n[CSV truncated, showing first 50 rows of " +
+                  textContent.split("\n").length +
+                  " total rows]"
+                : "");
 
-          resolve({
-            type: fileType,
-            data: null,
-            content: csvContent,
-            format: format,
-          });
-        }
-        // Code files (jsx, js, ts, etc.)
-        else if (isTextBasedFile(fileType, fileName)) {
-          format = "code";
-          const textContent = event.target.result;
-          // Maximum text length to prevent excessively large API calls
-          const maxLength = 100000;
-          const truncatedContent =
-            textContent.length > maxLength
-              ? textContent.substring(0, maxLength) +
-                "\n\n[Content truncated due to size limits...]"
-              : textContent;
-
-          // Identify language for code highlighting
-          let language = "plaintext";
-          if (extension) {
-            // Map file extensions to markdown language codes
-            const languageMap = {
-              js: "javascript",
-              jsx: "jsx",
-              ts: "typescript",
-              tsx: "tsx",
-              py: "python",
-              rb: "ruby",
-              java: "java",
-              c: "c",
-              cpp: "cpp",
-              cs: "csharp",
-              php: "php",
-              html: "html",
-              css: "css",
-              sql: "sql",
-              json: "json",
-              xml: "xml",
-              md: "markdown",
-              sh: "bash",
-              yml: "yaml",
-              yaml: "yaml",
-            };
-
-            language = languageMap[extension] || "plaintext";
-          }
-
-          resolve({
-            type: fileType,
-            data: null,
-            content: truncatedContent,
-            format: format,
-            language: language,
-          });
+            resolve({
+              type: fileType,
+              data: null,
+              content: csvContent,
+              format: format,
+            });
+          };
+          reader.onerror = reject;
+          reader.readAsText(file);
         }
         // For other files (binary), convert to base64 with data URL
         else {
@@ -648,24 +677,17 @@ const readFileContent = async (file) => {
           });
         }
       } catch (error) {
+        console.error("Error in readFileContent:", error);
         reject(error);
       }
     };
 
-    reader.onerror = () => {
-      reject(new Error(`Failed to read file: ${file.name}`));
+    reader.onerror = (error) => {
+      console.error("FileReader error:", error);
+      reject(error);
     };
 
-    // Choose appropriate reading method based on file type
-    if (
-      file.type.startsWith("image/") ||
-      file.type === "application/pdf" ||
-      (!isTextBasedFile(file.type, file.name) && !file.type.includes("text/"))
-    ) {
-      reader.readAsDataURL(file);
-    } else {
-      reader.readAsText(file);
-    }
+    reader.readAsDataURL(file);
   });
 };
 
@@ -709,60 +731,83 @@ export const generateGeminiResponse = async (messages) => {
             )
             .join("\n");
 
-          // If we have only files and no content, add a description
-          if (!msg.content || msg.content.trim() === "") {
-            parts.push({
-              text: `The user has shared the following files:\n${filesDescription}`,
-            });
-          }
+          // Add the description of files to the parts
+          parts.push({
+            text: msg.content
+              ? `${msg.content}\n\n${filesDescription}`
+              : `The user has shared the following files:\n${filesDescription}`,
+          });
 
           // Process each file to get its content
           for (const file of msg.files) {
             try {
-              // We need to access the actual File object
-              if (file.file instanceof File) {
-                const fileContent = await readFileContent(file.file);
+              // Log for debugging
+              console.log(
+                "Processing file:",
+                file.name,
+                "Type:",
+                file.type,
+                "File object:",
+                file.file
+              );
 
-                // Add image files as inline data
-                if (fileContent.format === "image" && fileContent.data) {
-                  parts.push({
-                    inlineData: {
-                      mimeType: file.type,
-                      data: fileContent.data,
-                    },
-                  });
-                }
-                // Add PDF files with extracted content
-                else if (fileContent.format === "pdf") {
-                  parts.push({
-                    text: `PDF file "${file.name}":\n\n${fileContent.content}\n\n`,
-                  });
-                }
-                // Add CSV files with content properly formatted
-                else if (fileContent.format === "csv" && fileContent.content) {
-                  parts.push({
-                    text: `CSV file "${file.name}":\n\n\`\`\`csv\n${fileContent.content}\n\`\`\`\n\n`,
-                  });
-                }
-                // Add code files with proper syntax highlighting
-                else if (fileContent.format === "code" && fileContent.content) {
+              // Get the actual File object - could be on file.file or directly on file
+              let fileObj = null;
+              if (file.file instanceof File) {
+                fileObj = file.file;
+              } else if (file instanceof File) {
+                fileObj = file;
+              } else if (file.file && typeof file.file === "object") {
+                // Try to access the File object from a nested property
+                fileObj = file.file;
+              }
+
+              if (!fileObj) {
+                console.warn(
+                  `No valid File object found for ${file.name}`,
+                  file
+                );
+                parts.push({
+                  text: `[File content unavailable: ${file.name}]`,
+                });
+                continue;
+              }
+
+              console.log("Reading file content for:", fileObj.name);
+              const fileContent = await readFileContent(fileObj);
+
+              // Add image files as inline data
+              if (fileContent.format === "image" && fileContent.data) {
+                parts.push({
+                  inlineData: {
+                    mimeType: file.type,
+                    data: fileContent.data,
+                  },
+                });
+              }
+              // Add file content as text for non-image files
+              else if (fileContent.content) {
+                let fileText = "";
+
+                // Format based on file type
+                if (fileContent.format === "pdf") {
+                  fileText = `PDF file "${file.name}":\n\n${fileContent.content}\n\n`;
+                } else if (fileContent.format === "csv") {
+                  fileText = `CSV file "${file.name}":\n\n\`\`\`csv\n${fileContent.content}\n\`\`\`\n\n`;
+                } else if (fileContent.format === "code") {
                   const language = fileContent.language || "plaintext";
-                  parts.push({
-                    text: `Code file "${file.name}":\n\n\`\`\`${language}\n${fileContent.content}\n\`\`\`\n\n`,
-                  });
+                  fileText = `Code file "${file.name}":\n\n\`\`\`${language}\n${fileContent.content}\n\`\`\`\n\n`;
+                } else {
+                  fileText = `Content of file "${file.name}":\n\n${fileContent.content}\n\n`;
                 }
-                // Add text content for other files
-                else if (fileContent.content) {
-                  parts.push({
-                    text: `Content of file "${file.name}":\n\n${fileContent.content}\n\n`,
-                  });
-                }
-              } else {
-                console.warn(`File object not available for ${file.name}`);
+
+                parts.push({ text: fileText });
               }
             } catch (fileError) {
               console.error(`Error processing file ${file.name}:`, fileError);
-              parts.push({ text: `[Error reading file: ${file.name}]` });
+              parts.push({
+                text: `[Error reading file: ${file.name}: ${fileError.message}]`,
+              });
             }
           }
         }

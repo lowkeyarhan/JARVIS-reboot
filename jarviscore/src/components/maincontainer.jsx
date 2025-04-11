@@ -567,6 +567,8 @@ function MainContainer() {
         content: msg.content,
         // Include image if present
         ...(msg.image && { image: msg.image }),
+        // Include files if present - ensure we pass the File objects correctly
+        ...(msg.files && { files: msg.files }),
       }));
 
       // Call API to get response
