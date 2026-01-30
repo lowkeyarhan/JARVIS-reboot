@@ -1,5 +1,5 @@
 // API Key and URL
-const apiKey = "AIzaSyAR2Y-3i75WrJCzhPZ7IIsylrewzBKJCYY";
+const apiKey = "teri maa ki chuu";
 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
 // Import PDF.js for PDF text extraction
